@@ -1,2 +1,2 @@
-# wifidrop
+# WIFIDrop
 Instant WIFI File Transfer
