@@ -1,9 +1,23 @@
-export function setupDrop(element) {
+export function setupDrop(element,callback) {
   let counter = 0
   const setCounter = (count) => {
     counter = count
     element.innerHTML = `Drop count is ${counter}`
   }
-  element.addEventListener('click', () => setCounter(counter + 1))
-  //setCounter(0)
+  element.addEventListener('click', () => {
+	  fOpenFilePicker(callback)
+  })
+  
+}
+
+function fOpenFilePicker(callback){
+  let input = document.createElement('input');
+  input.type = 'file';
+  input.onchange = _ => {
+    // you can use this method to get file and perform respective operations
+            let files =   Array.from(input.files);
+            //console.log(files);
+			callback(files)
+        };
+  input.click();
 }
