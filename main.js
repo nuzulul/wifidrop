@@ -3,6 +3,8 @@ import wifidropLogo from './wifidrop.svg'
 import { setupDrop } from './drop.js'
 import {KVStorage} from 'kv-storage'
 import {generateName} from './utils.js'
+import webconnect from 'webconnect'
+import * as config from  './config.js'
 
 let me = {}
 
@@ -93,10 +95,152 @@ if(meList.keys.length == 0){
 }
 
 function updateMe(){
-	document.querySelector('.peer.me .device-name').innerHTML = me.name
+	document.querySelector('.peer.me .device-name').innerHTML = 'Me : '+me.name
 	document.querySelector('.peer.me .device').innerHTML = `
-		<img class="device-avatar" src="https://blobcdn.com/blob.svg?seed=${me.name}&fill=${me.color}&extraPoints=9">
+		<img class="device-avatar" src="https://blobcdn.com/blob.svg?seed=${me.id}&fill=${me.color}&extraPoints=9">
 	`
 }
 
 updateMe()
+
+
+
+const stunurls = config.CONFIG_WEBRTC_STUN_URLS
+const stunurlsbackup = config.CONFIG_WEBRTC_STUN_URLS_BACKUP
+
+const turnurls = atob(config.CONFIG_WEBRTC_TURN_HOST)
+const turnusername = atob(config.CONFIG_WEBRTC_TURN_USER)
+const turncredential = atob(config.CONFIG_WEBRTC_TURN_PWD)
+
+const turnurlsbackup = atob(config.CONFIG_WEBRTC_TURN_HOST_BACKUP)
+const turnusernamebackup = atob(config.CONFIG_WEBRTC_TURN_USER_BACKUP)
+const turncredentialbackup = atob(config.CONFIG_WEBRTC_TURN_PWD_BACKUP)
+
+async function checkice(stunurls,turnurls,turnusername,turncredential,time){
+	return new Promise((resolve)=>{
+		
+		let stun = false
+		let turn = false
+		
+		const timeout = setTimeout(()=>{
+			let ice = []
+			ice.push(stun)
+			ice.push(turn)
+			resolve(ice)
+		},time)
+		
+		function check(){
+			if(stun && turn){
+				let ice = []
+				ice.push(stun)
+				ice.push(turn)
+				clearTimeout(timeout)
+				resolve(ice)
+			}
+		}
+		
+		//test ice servers
+		
+		const iceServers = [
+			{
+				urls: stunurls
+			},
+			{
+				urls: turnurls, 
+				username: turnusername, 
+				credential: turncredential
+			}
+		];
+
+		const pc = new RTCPeerConnection({
+			iceServers
+		});
+
+		pc.onicecandidate = (e) => {
+			if (!e.candidate) return;
+
+			//console.log(e.candidate.candidate);
+			//console.log(e.candidate);
+
+			// stun works
+			if(e.candidate.type == "srflx"){
+				//console.log('publicip',e.candidate.address);
+				//console.log('publicport',e.candidate.port);
+				//console.log('candidate',e.candidate);
+				me.address = e.candidate.address
+				me.priority = e.candidate.priority
+				stun = 	{
+							urls: stunurls
+						}
+				check()
+			}
+
+			// turn works
+			if(e.candidate.type == "relay"){
+				turn =  {
+							urls: turnurls, 
+							username: turnusername, 
+							credential: turncredential
+						}
+				check()
+			}
+		};
+
+		pc.onicecandidateerror = (e) => {
+			console.debug(e);
+		};
+
+		pc.createDataChannel('webpeerjs');
+		pc.createOffer().then(offer => pc.setLocalDescription(offer));
+	})
+}
+
+let ice = []
+
+ice = await checkice(stunurls,turnurls,turnusername,turncredential,5000)
+
+//console.log(ice)
+
+//recheck ice
+if(!ice[0] && !ice[1]){
+	ice = await checkice(stunurlsbackup,turnurlsbackup,turnusernamebackup,turncredentialbackup,5000)
+}else if (ice[0] && !ice[1]){
+	ice = await checkice(stunurls,turnurlsbackup,turnusernamebackup,turncredentialbackup,5000)
+}else if (!ice[0] && ice[1]){
+	ice = await checkice(stunurlsbackup,turnurls,turnusername,turncredential,5000)
+}
+
+//console.log(ice)
+
+//final ice remove false value
+ice.forEach(function(value, index) {
+  if(!value){
+	  this.splice(index, 1)
+  }
+}, ice);
+
+console.log('ice',ice)
+//console.log('me',me)
+
+
+const connect = webconnect({
+	appName:"WIFIDrop",
+	channelName:"WIFIDropRoom",
+	connectPassword:me.address+me.priority,
+	iceConfiguration:{config:{iceServers:ice}}
+})
+connect.onConnect(async(attribute)=>{
+	console.log("Connect",attribute)
+	connect.Send("hello",{connectId:attribute.connectId})
+	console.log(await connect.Ping({connectId:attribute.connectId}))
+	connect.getConnection((attribute)=>{
+		console.log("Connection",attribute)
+	})
+})
+connect.onDisconnect((attribute)=>{
+	console.log("Disconnect",attribute)
+})
+
+connect.onReceive((data,attribute) =>{
+	console.log(data,attribute)
+})

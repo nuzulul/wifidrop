@@ -27,6 +27,7 @@ var nameList = [
 export function generateName() {
   let name1 = nameList[Math.floor( Math.random() * nameList.length )];
   let name2 = nameList[Math.floor( Math.random() * nameList.length )];
-  const result = name1+' '+name2
+  //const result = name1+' '+name2
+  const result = name1
   return result
 };
