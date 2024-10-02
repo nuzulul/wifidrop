@@ -75,6 +75,40 @@ h1 {
   background:#f4f5f8;
 }
 
+.peers{
+	border:0px solid green;
+	padding:5px 5px 5px 5px;
+}
+
+.peer{
+	background:white;
+	width:100px;
+	height:100px;
+	display:inline-block;
+	padding:5px 5px;
+	margin:5px 5px;
+}
+
+.device{
+	width:75px;
+	height:75px;
+	border-radius:50% 50% 50% 50%;
+	background:white;
+	margin: auto;
+	padding:5px;
+	border: 1px solid grey
+}
+
+.device-name{
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.device-avatar{
+	width:100%;
+}
+
 .read-the-docs {
   color: #888;
 }
@@ -97,7 +131,7 @@ button:hover {
 }
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  /*outline: 4px auto -webkit-focus-ring-color;*/
 }
 
 @media (prefers-color-scheme: light) {
