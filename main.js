@@ -7,6 +7,7 @@ import webconnect from 'webconnect'
 import * as config from  './config.js'
 
 let me = {}
+let peers = new Map()
 
 document.querySelector('#app').innerHTML = `
   <div>
@@ -20,14 +21,6 @@ document.querySelector('#app').innerHTML = `
 	
 	<div class="peers">
 		<div class="peer me">
-			<div class="device"></div>
-			<div class="device-name">DEVICE</div>
-		</div>
-		<div class="peer">
-			<div class="device"></div>
-			<div class="device-name">DEVICE</div>
-		</div>
-		<div class="peer">
 			<div class="device"></div>
 			<div class="device-name">DEVICE</div>
 		</div>	
@@ -230,17 +223,67 @@ const connect = webconnect({
 	iceConfiguration:{config:{iceServers:ice}}
 })
 connect.onConnect(async(attribute)=>{
-	console.log("Connect",attribute)
-	connect.Send("hello",{connectId:attribute.connectId})
-	console.log(await connect.Ping({connectId:attribute.connectId}))
+	//console.log("Connect",attribute)
+	//connect.Send("hello",{connectId:attribute.connectId})
+	//console.log(await connect.Ping({connectId:attribute.connectId}))
 	connect.getConnection((attribute)=>{
-		console.log("Connection",attribute)
+		//console.log("Connection",attribute)
 	})
+	fSendMyBio(attribute.connectId) 
 })
 connect.onDisconnect((attribute)=>{
 	console.log("Disconnect",attribute)
+	fDeletePeer(attribute.connectId)
 })
 
 connect.onReceive((data,attribute) =>{
 	console.log(data,attribute)
+	fParseData(data,attribute)
 })
+
+function fSendMyBio(connectId){
+	const mybio = {command:'announce',data:{jwkpublicKey:me.jwkpublicKey,name:me.name,color:me.color}}
+	connect.Send(JSON.stringify(mybio),{connectId})
+}
+
+function fParseData(data,attribute){
+	const json = JSON.parse(data)
+	const connectId = attribute.connectId
+	const metadata = attribute.metadata
+	if(json.command == 'announce'){
+		if(peers.has(connectId)){
+			//update
+		}else{
+			//new
+			fAddNewPeer(connectId,json.data)
+		}
+	}
+}
+
+function fAddNewPeer(connectId,data){
+	//add to peers
+	let peer = data
+	const publicKey = JSON.stringify(data.jwkpublicKey)
+	const id = btoa(publicKey)
+	peer.id = id
+	peers.set(connectId,peer)
+	
+	//add to ui
+	const el = `
+		<div class="peer ${connectId}">
+			<div class="device"><img class="device-avatar" src="https://blobcdn.com/blob.svg?seed=${peer.id}&fill=${peer.color}&extraPoints=9"></div>
+			<div class="device-name">${fSafe(peer.name)}</div>
+		</div>
+	`
+	
+	document.querySelector('.peers').innerHTML += el
+}
+
+function fSafe(data){
+	return data
+}
+
+function fDeletePeer(connectId){
+	peers.delete(connectId)
+	document.querySelector('.peer.'+connectId).remove()
+}
