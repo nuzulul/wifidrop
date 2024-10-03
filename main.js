@@ -88,23 +88,26 @@ if(meList.keys.length == 0){
 	const skipconfirmation = true
 	me.skipconfirmation = skipconfirmation
 	await dbMe.put('skipconfirmation',skipconfirmation)
-	
+	const key = base32hex.encode(strpublicKey)
+	me.key = key
 }else{
-	const publicKey = await dbMe.get('publicKey')
-	const jwkpublicKey = JSON.parse(publicKey)
-	const privateKey = await dbMe.get('privateKey')
-	const jwkprivateKey = JSON.parse(privateKey)
+	const strpublicKey = await dbMe.get('publicKey')
+	const jwkpublicKey = JSON.parse(strpublicKey)
+	const strprivateKey = await dbMe.get('privateKey')
+	const jwkprivateKey = JSON.parse(strprivateKey)
 	me.jwkpublicKey = jwkpublicKey
 	me.jwkprivateKey = jwkprivateKey
-	me.publicKey = publicKey
+	me.publicKey = strpublicKey
 	const name = await dbMe.get('name')
 	me.name = name
-	const id = btoa(publicKey)
+	const id = btoa(strpublicKey)
 	me.id = id
 	const color = await dbMe.get('color')
 	me.color = color
 	const skipconfirmation = await dbMe.get('skipconfirmation')
 	me.skipconfirmation = skipconfirmation
+	const key = base32hex.encode(strpublicKey)
+	me.key = key
 }
 
 async function fHistory(){
@@ -293,7 +296,7 @@ connect.onReceiveProgress((attribute) => {
 })
 connect.onSendProgress((attribute) => {
 	//console.log(`Sending progress : ${attribute.percent} to ${attribute.connectId}`)
-	console.log('attribute',attribute)
+	//console.log('attribute',attribute)
 	if(attribute.metadata != undefined){
 		fSendFileProgress(attribute)
 	}
@@ -432,7 +435,7 @@ function fSafe(data){
 
 function fDeletePeer(connectId){
 	peers.delete(connectId)
-	document.querySelector('.peers .peer.peer-'+connectId).remove()
+	if(document.querySelector('.peers .peer.peer-'+connectId))document.querySelector('.peers .peer.peer-'+connectId).remove()
 	if(document.querySelector('.sendto-list') != null){
 		document.querySelector('.sendto-list .peer.peer-'+connectId).remove()
 		if(peers.size == 0){
@@ -607,19 +610,20 @@ async function fSendFile(connectId,filesid){
 		
 		setTimeout(()=>{
 			fAddExplorerFile(peer,file,fileid,time,send,complete)
-		},1000)
+			let reader = new FileReader();
+			reader.onload = function() {
+				let arrayBuffer = this.result
+				const attribute = {connectId,metadata:{fileid,name:file.name, type: file.type,size:file.size}}
+				connect.Send(arrayBuffer,attribute)
+			}
+			reader.readAsArrayBuffer(file);	
+		},500)
 		
 		//save to dbHistory
-		const item = {author:key,fileid,time,name:file.name,size:file.size,send,complete}
-		await dbHistory.put(fileid,item)
+		//const item = {author:key,fileid,time,name:file.name,size:file.size,send,complete}
+		//await dbHistory.put(fileid,item)
 		
-		let reader = new FileReader();
-		reader.onload = function() {
-			let arrayBuffer = this.result
-			const attribute = {connectId,metadata:{fileid,name:file.name, type: file.type,size:file.size}}
-			connect.Send(arrayBuffer,attribute)
-		}
-		reader.readAsArrayBuffer(file);		
+	
 	}
 }
 
@@ -644,17 +648,34 @@ async function fReceiveFileProgress(attribute){
 		document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
 	}
 	
-	//save to dbHistory
-	const item = {author:key,fileid,time,name,size,send,complete}
-	await dbHistory.put(fileid,item)
+	if(percent == 1){
+		//save to dbHistory
+		const item = {author:key,fileid,time,name,size,send,complete}
+		await dbHistory.put(fileid,item)
+	}
 	
 }
 
-function fSendFileProgress(attribute){
-	const fileid = atrribute.metadata.fileid
+async function fSendFileProgress(attribute){
+	const connectId = attribute.connectId
+	const peer = peers.get(connectId)
+	const publicKey = JSON.stringify(peer.jwkpublicKey)
+	const key = base32hex.encode(publicKey)
+	const metadata = attribute.metadata
+	const fileid = metadata.fileid
+	const name = metadata.name
+	const size = metadata.size
+	const time = (new Date()).getTime()
 	const percent = attribute.percent 
 	const complete = Math.floor(percent*100)
+	const send = true
 	document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
+
+	if(percent == 1){
+		//save to dbHistory
+		const item = {author:key,fileid,time,name,size,send,complete}
+		await dbHistory.put(fileid,item)
+	}
 }
 
 //HISTORY files
@@ -674,7 +695,10 @@ function showexplorer(){
 	//document.querySelector('.sendto').remove()
 	setTimeout(()=>{
 		document.querySelector('.explorer').style.display = "flex"
-	},1000)
+		const scroller = document.querySelector('.scroller')
+		scroller.scrollTop = scroller.scrollHeight
+	},500)
+
 }
 
 function fAddExplorerFile(peer,file,fileid,time,send,complete){
