@@ -118,18 +118,21 @@ h1 {
 	cursor:pointer;
 }
 
-.sendto{
+.dialog{
 	background: rgba(0, 0, 0, 0.8);
 	position: fixed;
-	z-index: 50;
 	align-items: center;
 	justify-content: center;
-	display: flex;
 	bottom: 0;
 	left: 0;
 	right: 0;
 	top: 0;
 	border:1px solid grey;
+}
+
+.sendto{
+	display: flex;
+	z-index: 50;
 }
 
 #parax,#explorerx{
@@ -176,18 +179,9 @@ h1 {
 	justify-content: center;
 }
 
-.explorer{
-	background: rgba(0, 0, 0, 0.8);
-	position: fixed;
-	z-index: 40;
-	align-items: center;
-	justify-content: center;
+.explorer{	
 	display: none;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	top: 0;
-	border:1px solid grey;
+	z-index: 40;
 }
 
 .files{
@@ -257,7 +251,47 @@ h1 {
 
 }
 
+.offer{	
+	display: flex;
+	z-index: 60;
+}
 
+.offer .message,.answer .message{
+	border-radius: 0em;
+	margin: 0px 0px;
+	height: auto;
+	max-width: 250px;
+	object-fit: contain;
+	background-image:none;
+	background:#fff;
+	border:none;
+	display:flex;
+	place-items:center;
+	flex-direction: column;
+}
+
+.offer .message .title,.answer .message .title{
+	width:100%;
+	border:1px solid grey;
+}
+
+.offer .content,.answer .content{
+	justify-content: center;
+	padding:15px 15px;
+}
+
+.answer{	
+	display: flex;
+	z-index: 70;
+}
+
+.answer .footer{
+	padding:5px 5px;
+}
+
+.answer button{
+	width:auto;
+}
 
 button {
   border-radius: 8px;

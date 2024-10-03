@@ -9,6 +9,8 @@ import * as config from  './config.js'
 
 let me = {}
 let peers = new Map()
+let files = new Map()
+let myid = ''
 
 document.querySelector('#app').innerHTML = `
   <div>
@@ -29,11 +31,12 @@ document.querySelector('#app').innerHTML = `
   </div>
 `
 
-const dropCallback = (files)=>{
-	console.log(files);
-	window.files = files
+const dropCallback = (data)=>{
+	//console.log(data);
+	const filesid = myid+new Date().getTime().toString() + Math.floor(Math.random() * 1000000)
+	files.set(filesid,data)
 	setTimeout(()=>{
-		fOpenPeers(files)
+		fOpenPeers(filesid)
 	},500)
 }
 
@@ -239,6 +242,7 @@ const connect = webconnect({
 	connectPassword:me.address+me.priority,
 	iceConfiguration:{config:{iceServers:ice}}
 })
+connect.getMyId((attribute) => myid = attribute.connectId)
 connect.onConnect(async(attribute)=>{
 	//console.log("Connect",attribute)
 	//connect.Send("hello",{connectId:attribute.connectId})
@@ -259,7 +263,7 @@ connect.onReceive((data,attribute) =>{
 })
 
 function fSendMyBio(connectId){
-	const mybio = {command:'announce',data:{jwkpublicKey:me.jwkpublicKey,name:me.name,color:me.color}}
+	const mybio = {command:'announce',data:{name:me.name,color:me.color}}
 	 fSendData(mybio,connectId)
 }
 
@@ -290,6 +294,8 @@ async function importPublicKey(jwk) {
 }
 
 async function fSendData(json,connectId){
+	
+	json.data.jwkpublicKey = me.jwkpublicKey
 	
 	const privateKey = await importPrivateKey(me.jwkprivateKey)
 	
@@ -338,6 +344,18 @@ async function fParseData(data,attribute){
 			fAddNewPeer(connectId,json.data)
 		}
 	}
+	else if(json.command == 'offer'){
+		const offer = json.data
+		fAnswerFile(attribute.connectId,json.data)
+	}
+	else if(json.command == 'answer'){
+		const value = json.data.value
+		if(value){
+			fAcceptAnswer(attribute.connectId,json.data)
+		}else{
+			fDeclineAnswer(attribute.connectId,json.data)
+		}
+	}
 }
 
 async function fAddNewPeer(connectId,data){
@@ -365,7 +383,7 @@ async function fAddNewPeer(connectId,data){
 	
 	//add to send to list
 	if(document.querySelector('.sendto-list') != null){
-		fAddSendToList(peer)
+		fAddSendToList(peer,window.filesid)
 	}
 }
 
@@ -384,19 +402,22 @@ function fDeletePeer(connectId){
 	}
 }
 
-function fOpenPeers(files){
+function fOpenPeers(filesid){
   const para = document.createElement("div");
-  para.innerHTML = '<div class="sendto"><div id="parax"><span style="font-size:30px;color:#fff;">X</span></div><div  class="popup"><div class="title"><div style="padding:10px 10px;">1 File</div></div><div class="scroller sendto-list" ></div></div></div>';
+  para.innerHTML = '<div class="dialog sendto"><div id="parax"><span style="font-size:30px;color:#fff;">X</span></div><div class="popup"><div class="title"><div style="padding:10px 10px;">1 File</div></div><div class="scroller sendto-list" ></div></div></div>';
   
   document.body.appendChild(para);
   
-  document.querySelector('#parax').addEventListener("click",()=>{
+  document.querySelector('.sendto #parax').addEventListener("click",()=>{
     para.remove(); 
   })
-
+	
+	window.filesid = filesid
 	if(peers.size > 0){
+		  
 		  peers.forEach((peer)=>{
-			  fAddSendToList(peer,files)
+			  
+			  fAddSendToList(peer,filesid)
 		  })
 	}else{
 		fInfoNoPeers()
@@ -404,10 +425,10 @@ function fOpenPeers(files){
 }
 
 function fInfoNoPeers(){
-	document.querySelector('.sendto-list').innerHTML = '<div class="infonopeers" style="padding:15px 15px;">No other devices connected to WIFIDrop on the same network ...</div>'
+	document.querySelector('.sendto-list').innerHTML = '<div class="infonopeers" style="padding:15px 15px;">Waiting for other devices connected to WIFIDrop on the same network ...</div>'
 }
 
-function fAddSendToList(peer,files){
+function fAddSendToList(peer,filesid){
 	//console.log(peer)
 	if(document.querySelector('.infonopeers') != null){
 		document.querySelector('.infonopeers').remove()
@@ -424,10 +445,10 @@ function fAddSendToList(peer,files){
 	
 	document.querySelector('.sendto-list .peer.peer-'+peer.connectId).style.display = "none"
 	
-	setTimeout((files)=>{
+	setTimeout(()=>{
 		document.querySelector('.sendto-list .peer.peer-'+peer.connectId).addEventListener("click",()=>{ 
 			
-			fSendFile(peer,files)
+			fOfferFile(peer,filesid)
 		})
 		document.querySelector('.sendto-list .peer.peer-'+peer.connectId).style.display = "block"
 		
@@ -447,10 +468,89 @@ function fAddSendToList(peer,files){
 
 }
 
-function fSendFile(peer,files){
+function fOfferFile(peer,filesid){
+
+	let datafiles = files.get(filesid)
+	
+	const length = datafiles.length
+	let size = 0
+	for(const file of datafiles){
+		size += file.size
+	}
+	
+	document.querySelector('.sendto').remove()
+	
+	const para = document.createElement("div");
+	para.innerHTML = `<div class="dialog offer offer-${filesid}"><div id="parax" style="display:block;"><span style="font-size:30px;color:#fff;">X</span></div><div class="message"><div class="title"><div style="padding:10px 10px;">Waiting confirmation</div></div><div class="content" >You want to send  ${fSafe(length)} file(s) of ${getSizeUnit(fSafe(size))} to ${fSafe(peer.name)} ...</div></div></div>`;
+	  
+	document.body.appendChild(para);
+	  
+	document.querySelector('.offer.offer-'+filesid+' #parax').addEventListener("click",()=>{
+		para.remove(); 
+	})
+
+
+	
+	const offer = {command:'offer',data:{length,size,filesid}}
+	 fSendData(offer,peer.connectId)
+
+}
+
+function fAnswerFile(connectId,data){
+	if(peers.has(connectId)){
+		
+		const peer = peers.get(connectId)
+		
+		const para = document.createElement("div");
+		para.innerHTML = `
+			<div class="dialog answer answer-${data.filesid}">
+				<div id="parax" style="display:none;"><span style="font-size:30px;color:#fff;">X</span></div>
+				<div class="message">
+					<div class="title"><div style="padding:10px 10px;">${peer.name}</div></div>
+					<div class="content" >is sending you ${fSafe(data.length)} file(s) of ${getSizeUnit(fSafe(data.size))}</div>
+					<div class="footer">
+						<button class="decline">DECLINE</button>
+						<button class="accept">ACCEPT></button>
+					</div>
+				</div>
+		</div>`;
+		  
+		document.body.appendChild(para);
+		  
+		document.querySelector('.answer.answer-'+data.filesid+' #parax').addEventListener("click",()=>{
+			para.remove(); 
+		})
+
+		document.querySelector('.answer.answer-'+data.filesid+' .decline').addEventListener("click",()=>{
+			para.remove(); 
+			const filesid = data.filesid
+			const answer = {command:'answer',data:{value:false,filesid}}
+			fSendData(answer,connectId)
+		})
+
+		document.querySelector('.answer.answer-'+data.filesid+' .accept').addEventListener("click",()=>{
+			para.remove(); 
+			const filesid = data.filesid
+			const answer = {command:'answer',data:{value:true,filesid}}
+			fSendData(answer,connectId)
+		})
+	}
+}
+
+function fAcceptAnswer(connectId,data){
+	if(document.querySelector('.offer.offer-'+data.filesid))document.querySelector('.offer.offer-'+data.filesid).remove()
+	fSendFile(connectId,filesid)
+}
+
+function fDeclineAnswer(connectId,data){
+	if(document.querySelector('.offer.offer-'+data.filesid))document.querySelector('.offer.offer-'+data.filesid).remove()
+}
+
+function fSendFile(connectId,filesid){
 	showexplorer()
-	files = window.files
-	for(const file of files){
+	const peer = peers.get(connectId)
+	let datafiles = files.get(filesid)
+	for(const file of datafiles){
 		const time = (new Date()).getTime()
 		const fileid = file.size.toString()+time.toString()
 		console.log('send',fileid)
@@ -463,7 +563,7 @@ function fSendFile(peer,files){
 
 //HISTORY files
 const explorer = document.createElement("div");
-explorer.innerHTML = '<div class="explorer"><div id="explorerx"><span style="font-size:30px;color:#fff;">X</span></div><div  class="popup"><div class="title"><div style="padding:10px 10px;">Files</div></div><div class="scroller files" ></div></div></div>';
+explorer.innerHTML = '<div class="dialog explorer"><div id="explorerx"><span style="font-size:30px;color:#fff;">X</span></div><div  class="popup"><div class="title"><div style="padding:10px 10px;">Files</div></div><div class="scroller files" ></div></div></div>';
 
 document.body.appendChild(explorer);
 
@@ -473,7 +573,7 @@ document.querySelector('#explorerx').addEventListener("click",()=>{
 })
 
 function showexplorer(){
-	document.querySelector('.sendto').remove()
+	//document.querySelector('.sendto').remove()
 	setTimeout(()=>{
 		document.querySelector('.explorer').style.display = "flex"
 	},1000)
