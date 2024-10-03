@@ -89,6 +89,10 @@ h1 {
 	margin:5px 5px;
 }
 
+.peer.me{
+	cursor:pointer;
+}
+
 .device{
 	width:75px;
 	height:75px;

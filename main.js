@@ -286,6 +286,8 @@ connect.onReceive((data,attribute) =>{
 	//console.log(data,attribute)
 	if(attribute.metadata == undefined){
 		fParseData(data,attribute)
+	}else{
+		fReceiveData(data,attribute)
 	}
 })
 connect.onReceiveProgress((attribute) => {
@@ -421,7 +423,7 @@ async function fAddNewPeer(connectId,data){
 			<div class="device-name">${fSafe(peer.name)}</div>
 		</div>
 	`
-	document.querySelector('.peers').innerHTML += el
+	document.querySelector('.peers .peer.me').insertAdjacentHTML("afterend",el)
 	
 	//add to send to list
 	if(document.querySelector('.sendto-list') != null){
@@ -656,6 +658,20 @@ async function fReceiveFileProgress(attribute){
 	
 }
 
+function fReceiveData(data,attribute){
+	
+	let blob1 = new Blob([new Uint8Array(data)],{type:attribute.metadata.type})
+
+      const aElement = document.createElement('a');
+      aElement.setAttribute('download', attribute.metadata.name);
+      const href = URL.createObjectURL(blob1);
+      aElement.setAttribute('href', href);
+      aElement.setAttribute('target', '_blank');
+      aElement.click();
+      URL.revokeObjectURL(href);
+
+}
+
 async function fSendFileProgress(attribute){
 	const connectId = attribute.connectId
 	const peer = peers.get(connectId)
@@ -685,11 +701,13 @@ explorer.innerHTML = '<div class="dialog explorer"><div id="explorerx"><span sty
 document.body.appendChild(explorer);
 
 document.querySelector('#explorerx').addEventListener("click",()=>{
-	//explorer.style.display = "none" 
 	document.querySelector('.explorer').style.display = "none"
 })
-
+document.querySelector('.peers .peer.me').addEventListener("click",()=>{
+	showexplorer()
+})
 fHistory()
+
 
 function showexplorer(){
 	//document.querySelector('.sendto').remove()
@@ -703,7 +721,7 @@ function showexplorer(){
 
 function fAddExplorerFile(peer,file,fileid,time,send,complete){
 	const unit = getSizeUnit(file.size)
-	const note = send ? 'You sent to ':'Send by '
+	const note = send ? 'You sent to ':'Sent by '
 	let progress = '0%'
 	if(complete === 'start'){
 	}
