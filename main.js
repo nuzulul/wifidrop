@@ -13,6 +13,7 @@ let files = new Map()
 let myid = ''
 
 document.querySelector('#app').innerHTML = `
+  <span id="loader" style="display:block;"><div class="loading">Loading&#8230;</div></span>
   <div>
     <a href="/">
       <img src="${wifidropLogo}" class="logo vanilla" alt="WIFIDrop logo" /><h1 class="logo-text">WIFIDrop</h1>
@@ -86,7 +87,6 @@ if(meList.keys.length == 0){
 	await dbMe.put('color',randomColor)
 	me.color = randomColor
 	const skipconfirmation = true
-	me.skipconfirmation = skipconfirmation
 	await dbMe.put('skipconfirmation',skipconfirmation)
 	const key = base32hex.encode(strpublicKey)
 	me.key = key
@@ -104,8 +104,6 @@ if(meList.keys.length == 0){
 	me.id = id
 	const color = await dbMe.get('color')
 	me.color = color
-	const skipconfirmation = await dbMe.get('skipconfirmation')
-	me.skipconfirmation = skipconfirmation
 	const key = base32hex.encode(strpublicKey)
 	me.key = key
 }
@@ -142,7 +140,7 @@ function fUpdateMe(){
 fUpdateMe()
 
 
-
+//////////////////////connection///////////////////////////////////////////////////////////
 const stunurls = config.CONFIG_WEBRTC_STUN_URLS
 const stunurlsbackup = config.CONFIG_WEBRTC_STUN_URLS_BACKUP
 
@@ -303,7 +301,7 @@ connect.onSendProgress((attribute) => {
 		fSendFileProgress(attribute)
 	}
 })
-
+//////////////////////connection///////////////////////////////////////////////////////////
 
 
 function fSendMyBio(connectId){
@@ -447,8 +445,17 @@ function fDeletePeer(connectId){
 }
 
 function fOpenPeers(filesid){
+	
+	let datafiles = files.get(filesid)
+	
+	const length = datafiles.length
+	let size = 0
+	for(const file of datafiles){
+		size += file.size
+	}
+	
   const para = document.createElement("div");
-  para.innerHTML = '<div class="dialog sendto"><div id="parax"><span style="font-size:30px;color:#fff;">X</span></div><div class="popup"><div class="title"><div style="padding:10px 10px;">1 File</div></div><div class="scroller sendto-list" ></div></div></div>';
+  para.innerHTML = `<div class="dialog sendto"><div id="parax"><span style="font-size:30px;color:#fff;">X</span></div><div class="popup"><div class="title"><div style="padding:10px 10px;">Send ${fSafe(length)} file(s) of ${getSizeUnit(fSafe(size))} to ...</div></div><div class="scroller sendto-list" ></div></div></div>`;
   
   document.body.appendChild(para);
   
@@ -540,12 +547,14 @@ function fOfferFile(peer,filesid){
 
 }
 
-function fAnswerFile(connectId,data){
+async function fAnswerFile(connectId,data){
 	if(peers.has(connectId)){
 		
 		const peer = peers.get(connectId)
 		
-		if(me.skipconfirmation){
+		const skipconfirmation = await dbMe.get('skipconfirmation')
+		
+		if(skipconfirmation){
 			const filesid = data.filesid
 			const answer = {command:'answer',data:{value:true,filesid}}
 			fSendData(answer,connectId)
@@ -696,7 +705,23 @@ async function fSendFileProgress(attribute){
 
 //HISTORY files
 const explorer = document.createElement("div");
-explorer.innerHTML = '<div class="dialog explorer"><div id="explorerx"><span style="font-size:30px;color:#fff;">X</span></div><div  class="popup"><div class="title"><div style="padding:10px 10px;">Files</div></div><div class="scroller files" ></div></div></div>';
+explorer.innerHTML = `
+	<div class="dialog explorer">
+		<div id="explorerx"><span style="font-size:30px;color:#fff;">X</span></div>
+		<div  class="popup">
+			<div class="title">
+				<div style="padding:10px 10px;">
+					Files 
+					<span class="options" style="float:right;cursor:pointer;">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
+						  <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/>
+						</svg>
+					</span>
+				</div>
+			</div>
+			<div class="scroller files" ></div>
+		</div>
+	</div>`
 
 document.body.appendChild(explorer);
 
@@ -707,6 +732,49 @@ document.querySelector('.peers .peer.me').addEventListener("click",()=>{
 	showexplorer()
 })
 fHistory()
+document.querySelector('.explorer .popup .title .options').addEventListener("click",()=>{
+	fOpenOptions()
+})
+
+function fOpenOptions(){
+	const para = document.createElement("div");
+	para.innerHTML = `
+	<div class="dialog options">
+		<div id="parax" style="display:block;"><span style="font-size:30px;color:#fff;">X</span></div>
+		<div class="message">
+			<div class="title">
+				<div style="padding:10px 10px;">Info</div>
+			</div>
+			<div class="content" >
+				<div class="item cache">
+					<span>
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+					  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+					  <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+					</svg>
+					</span>
+					<span>Clear cache </span>
+				</div>
+			</div>
+		</div>
+	</div>`;
+	  
+	document.body.appendChild(para);
+	  
+	document.querySelector('.options #parax').addEventListener("click",()=>{
+		para.remove(); 
+	})	
+
+	document.querySelector('.options .content .cache').addEventListener("click",async ()=>{
+		await dbBio.clear()
+		await dbHistory.clear()
+		const nodeList = document.querySelectorAll(".explorer .files .file")
+		for(const node of nodeList){
+			node.remove()
+		}
+	})
+}
+
 
 
 function showexplorer(){
@@ -715,7 +783,7 @@ function showexplorer(){
 		document.querySelector('.explorer').style.display = "flex"
 		const scroller = document.querySelector('.scroller')
 		scroller.scrollTop = scroller.scrollHeight
-	},500)
+	},200)
 
 }
 
@@ -745,3 +813,6 @@ function fAddExplorerFile(peer,file,fileid,time,send,complete){
 	const scroller = document.querySelector('.scroller')
 	scroller.scrollTop = scroller.scrollHeight
 }
+
+
+document.getElementById("loader").style.display = "none"

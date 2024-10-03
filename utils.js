@@ -168,14 +168,14 @@ export function getSizeUnit(size){
 	  // Approximate to the closest prefixed unit
   const units = [
 	"B",
-	"KiB",
-	"MiB",
-	"GiB",
-	"TiB",
-	"PiB",
-	"EiB",
-	"ZiB",
-	"YiB",
+	"KB",
+	"MB",
+	"GB",
+	"TB",
+	"PB",
+	"EB",
+	"ZB",
+	"YB",
   ];
   const exponent = Math.min(
 	Math.floor(Math.log(numberOfBytes) / Math.log(1024)),
@@ -185,7 +185,7 @@ export function getSizeUnit(size){
   const output =
 	exponent === 0
 	  ? `${numberOfBytes} bytes`
-	  : `${approx.toFixed(3)} ${
+	  : `${approx.toFixed(0)} ${
 		  units[exponent]
 		}`;
 	return output
