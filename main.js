@@ -736,7 +736,10 @@ document.querySelector('.explorer .popup .title .options').addEventListener("cli
 	fOpenOptions()
 })
 
-function fOpenOptions(){
+async function fOpenOptions(){
+	
+	const skipconfirmation = await dbMe.get('skipconfirmation')
+	
 	const para = document.createElement("div");
 	para.innerHTML = `
 	<div class="dialog options">
@@ -755,6 +758,10 @@ function fOpenOptions(){
 					</span>
 					<span>Clear cache </span>
 				</div>
+				<div class="item skipconfirmation">
+					<input type="checkbox" id="skipconfirmation" name="skipconfirmation" value="skipconfirmation" checked="${skipconfirmation}">
+					<label for="skipconfirmation"> Skip confirmation</label>
+				</div>
 			</div>
 		</div>
 	</div>`;
@@ -772,7 +779,28 @@ function fOpenOptions(){
 		for(const node of nodeList){
 			node.remove()
 		}
+		const el = `
+			<span class="cachecheck">
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
+				  <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"/>
+				</svg>		
+			</span>
+		`
+		document.querySelector('.options .content .cache span').insertAdjacentHTML("afterend",el)
+		setTimeout(()=>{
+			document.querySelector('.options .content .cache .cachecheck').remove()
+		},3000)
 	})
+
+	document.querySelector('.options .content .skipconfirmation').addEventListener("click",async ()=>{
+		const data = document.querySelector('.options .content .skipconfirmation')
+		if(data.checked){
+			await dbMe.put('skipconfirmation',true)
+		}else{
+			await dbMe.put('skipconfirmation',false)
+		}
+	})	
+
 }
 
 

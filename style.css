@@ -297,11 +297,15 @@ h1 {
 	width:auto;
 }
 
-.options .item {
+.options .content .item {
   line-height: 1.5;
   display: inline-block;
   vertical-align: middle;
   cursor:pointer;
+}
+
+.options .content .item input,.options .content .item label{
+	cursor:pointer;
 }
 
 button {
