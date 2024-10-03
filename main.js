@@ -86,7 +86,7 @@ if(meList.keys.length == 0){
 	var randomColor = Math.floor(Math.random()*16777215).toString(16);
 	await dbMe.put('color',randomColor)
 	me.color = randomColor
-	const skipconfirmation = true
+	const skipconfirmation = false
 	await dbMe.put('skipconfirmation',skipconfirmation)
 	const key = base32hex.encode(strpublicKey)
 	me.key = key
@@ -425,7 +425,7 @@ async function fAddNewPeer(connectId,data){
 	
 	//add to send to list
 	if(document.querySelector('.sendto-list') != null){
-		fAddSendToList(peer,window.filesid)
+		fAddSendToList(peer,window.currentfilesid)
 	}
 }
 
@@ -463,7 +463,7 @@ function fOpenPeers(filesid){
     para.remove(); 
   })
 	
-	window.filesid = filesid
+	window.currentfilesid = filesid
 	if(peers.size > 0){
 		  
 		  peers.forEach((peer)=>{
@@ -599,6 +599,7 @@ async function fAnswerFile(connectId,data){
 
 function fAcceptAnswer(connectId,data){
 	if(document.querySelector('.offer.offer-'+data.filesid))document.querySelector('.offer.offer-'+data.filesid).remove()
+	const filesid = data.filesid
 	fSendFile(connectId,filesid)
 }
 
@@ -663,6 +664,8 @@ async function fReceiveFileProgress(attribute){
 		//save to dbHistory
 		const item = {author:key,fileid,time,name,size,send,complete}
 		await dbHistory.put(fileid,item)
+		//change background colour
+		document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
 	}
 	
 }
@@ -700,6 +703,9 @@ async function fSendFileProgress(attribute){
 		//save to dbHistory
 		const item = {author:key,fileid,time,name,size,send,complete}
 		await dbHistory.put(fileid,item)
+		
+		//change background colour
+		document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
 	}
 }
 
@@ -740,6 +746,11 @@ async function fOpenOptions(){
 	
 	const skipconfirmation = await dbMe.get('skipconfirmation')
 	
+	let checkboxskipconfirmation = ''
+	if(skipconfirmation){
+		checkboxskipconfirmation = 'checked'
+	}
+	
 	const para = document.createElement("div");
 	para.innerHTML = `
 	<div class="dialog options">
@@ -759,7 +770,7 @@ async function fOpenOptions(){
 					<span>Clear cache </span>
 				</div>
 				<div class="item skipconfirmation">
-					<input type="checkbox" id="skipconfirmation" name="skipconfirmation" value="skipconfirmation" checked="${skipconfirmation}">
+					<input type="checkbox" id="skipconfirmation" name="skipconfirmation" value="skipconfirmation" ${checkboxskipconfirmation}>
 					<label for="skipconfirmation"> Skip download confirmation</label>
 				</div>
 			</div>
@@ -788,17 +799,13 @@ async function fOpenOptions(){
 		`
 		document.querySelector('.options .content .cache span').insertAdjacentHTML("afterend",el)
 		setTimeout(()=>{
-			document.querySelector('.options .content .cache .cachecheck').remove()
+			if(document.querySelector('.options .content .cache .cachecheck'))document.querySelector('.options .content .cache .cachecheck').remove()
 		},3000)
 	})
 
 	document.querySelector('.options .content .skipconfirmation').addEventListener("click",async ()=>{
-		const data = document.querySelector('.options .content .skipconfirmation')
-		if(data.checked){
-			await dbMe.put('skipconfirmation',true)
-		}else{
-			await dbMe.put('skipconfirmation',false)
-		}
+		const data = document.querySelector('.options .content .skipconfirmation #skipconfirmation')
+		await dbMe.put('skipconfirmation',data.checked)
 	})	
 
 }
@@ -826,8 +833,12 @@ function fAddExplorerFile(peer,file,fileid,time,send,complete){
 	else{
 		progress = complete+'%'
 	}
+	let background = ''
+	if(complete === 'finish' || complete == 100){
+		background = 'background:#bec4cf;'
+	}
 	let item = `
-		<div class="file file-${fileid}">
+		<div class="file file-${fileid}" style="${background}">
 			<div class="icon"><div style="width:50px;height:50px"><img src="${fileLogo}"></div></div>
 			<div class="loader"><div style="width:50px;height:50px"><div class="progress">${progress}</div></div></div>
 			<div class="body">

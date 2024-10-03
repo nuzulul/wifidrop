@@ -196,7 +196,7 @@ h1 {
 .file{
 	width:90%;
 	max-width:600px;
-	background:grey;
+	background:#646cff;
 	height:50px;
 	margin:5px 5px;
 }
@@ -307,6 +307,7 @@ h1 {
   vertical-align: middle;
   cursor:pointer;
   display:block;
+  margin:10px 10px;
 }
 
 .options .content .item input,.options .content .item label{
