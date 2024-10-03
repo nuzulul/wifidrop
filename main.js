@@ -56,7 +56,7 @@ const dbBio = await KVStorage({
 
 const dbHistory = await KVStorage({
 	runtime:'browser',
-	storageName:'wifidropdHistory'
+	storageName:'wifidropdbHistory'
 })
 
 const meList = await dbMe.list()
@@ -85,6 +85,10 @@ if(meList.keys.length == 0){
 	var randomColor = Math.floor(Math.random()*16777215).toString(16);
 	await dbMe.put('color',randomColor)
 	me.color = randomColor
+	const skipconfirmation = true
+	me.skipconfirmation = skipconfirmation
+	await dbMe.put('skipconfirmation',skipconfirmation)
+	
 }else{
 	const publicKey = await dbMe.get('publicKey')
 	const jwkpublicKey = JSON.parse(publicKey)
@@ -99,7 +103,25 @@ if(meList.keys.length == 0){
 	me.id = id
 	const color = await dbMe.get('color')
 	me.color = color
+	const skipconfirmation = await dbMe.get('skipconfirmation')
+	me.skipconfirmation = skipconfirmation
 }
+
+async function fHistory(){
+	const fileHistory = await dbHistory.list()
+	for(const key of fileHistory.keys){
+		const item = await dbHistory.get(key)
+		const peer = await dbBio.get(item.author)
+		const fileid = item.fileid
+		const time = item.time
+		const send = item.send
+		const complete = item.complete
+		const file = {size:item.size,name:item.name}
+		fAddExplorerFile(peer,file,fileid,time,send,complete)
+		
+	}
+}
+
 
 function fGenerateAvatar(seed,color){
 	const url = `https://blobcdn.com/blob.svg?seed=${fSafe(seed)}&fill=${fSafe(color)}&extraPoints=9`
@@ -259,8 +281,25 @@ connect.onDisconnect((attribute)=>{
 
 connect.onReceive((data,attribute) =>{
 	//console.log(data,attribute)
-	fParseData(data,attribute)
+	if(attribute.metadata == undefined){
+		fParseData(data,attribute)
+	}
 })
+connect.onReceiveProgress((attribute) => {
+	//console.log(`Receiving progress : ${attribute.percent} from ${attribute.connectId} metadata ${attribute.metadata}`)
+	if(attribute.metadata != undefined){
+		fReceiveFileProgress(attribute)
+	}
+})
+connect.onSendProgress((attribute) => {
+	//console.log(`Sending progress : ${attribute.percent} to ${attribute.connectId}`)
+	console.log('attribute',attribute)
+	if(attribute.metadata != undefined){
+		fSendFileProgress(attribute)
+	}
+})
+
+
 
 function fSendMyBio(connectId){
 	const mybio = {command:'announce',data:{name:me.name,color:me.color}}
@@ -369,7 +408,7 @@ async function fAddNewPeer(connectId,data){
 	
 	//add to idb dbBio
 	const key = base32hex.encode(publicKey)
-	await dbBio.put(key,JSON.stringify(peers))
+	await dbBio.put(key,peer)
 	
 	//add to ui
 	const avatar = fGenerateAvatar(peer.id,peer.color)
@@ -501,6 +540,13 @@ function fAnswerFile(connectId,data){
 		
 		const peer = peers.get(connectId)
 		
+		if(me.skipconfirmation){
+			const filesid = data.filesid
+			const answer = {command:'answer',data:{value:true,filesid}}
+			fSendData(answer,connectId)
+			return
+		}
+		
 		const para = document.createElement("div");
 		para.innerHTML = `
 			<div class="dialog answer answer-${data.filesid}">
@@ -546,19 +592,69 @@ function fDeclineAnswer(connectId,data){
 	if(document.querySelector('.offer.offer-'+data.filesid))document.querySelector('.offer.offer-'+data.filesid).remove()
 }
 
-function fSendFile(connectId,filesid){
+async function fSendFile(connectId,filesid){
 	showexplorer()
 	const peer = peers.get(connectId)
+	const publicKey = JSON.stringify(peer.jwkpublicKey)
+	const key = base32hex.encode(publicKey)
+	const send = true
+	const complete = 'start'
 	let datafiles = files.get(filesid)
 	for(const file of datafiles){
 		const time = (new Date()).getTime()
-		const fileid = file.size.toString()+time.toString()
-		console.log('send',fileid)
+		const fileid = file.size.toString()+time.toString()+ Math.floor(Math.random() * 1000000)
+		//console.log('send',fileid)
 		
 		setTimeout(()=>{
-			fAddExplorerFile(peer,file,fileid,time,true)
+			fAddExplorerFile(peer,file,fileid,time,send,complete)
 		},1000)
+		
+		//save to dbHistory
+		const item = {author:key,fileid,time,name:file.name,size:file.size,send,complete}
+		await dbHistory.put(fileid,item)
+		
+		let reader = new FileReader();
+		reader.onload = function() {
+			let arrayBuffer = this.result
+			const attribute = {connectId,metadata:{fileid,name:file.name, type: file.type,size:file.size}}
+			connect.Send(arrayBuffer,attribute)
+		}
+		reader.readAsArrayBuffer(file);		
 	}
+}
+
+async function fReceiveFileProgress(attribute){
+	const connectId = attribute.connectId
+	const peer = peers.get(connectId)
+	const publicKey = JSON.stringify(peer.jwkpublicKey)
+	const key = base32hex.encode(publicKey)
+	const percent = attribute.percent
+	const metadata = attribute.metadata
+	const fileid = metadata.fileid
+	const name = metadata.name
+	const size = metadata.size
+	const time = (new Date()).getTime()
+	const send = false
+	const complete = Math.floor(percent*100)
+	const file = {name,size}
+	if(!document.querySelector('.file.file-'+fileid)){
+		showexplorer()
+		fAddExplorerFile(peer,file,fileid,time,send,complete)
+	}else{
+		document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
+	}
+	
+	//save to dbHistory
+	const item = {author:key,fileid,time,name,size,send,complete}
+	await dbHistory.put(fileid,item)
+	
+}
+
+function fSendFileProgress(attribute){
+	const fileid = atrribute.metadata.fileid
+	const percent = attribute.percent 
+	const complete = Math.floor(percent*100)
+	document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
 }
 
 //HISTORY files
@@ -572,6 +668,8 @@ document.querySelector('#explorerx').addEventListener("click",()=>{
 	document.querySelector('.explorer').style.display = "none"
 })
 
+fHistory()
+
 function showexplorer(){
 	//document.querySelector('.sendto').remove()
 	setTimeout(()=>{
@@ -579,13 +677,21 @@ function showexplorer(){
 	},1000)
 }
 
-function fAddExplorerFile(peer,file,fileid,time,send){
+function fAddExplorerFile(peer,file,fileid,time,send,complete){
 	const unit = getSizeUnit(file.size)
 	const note = send ? 'You sent to ':'Send by '
+	let progress = '0%'
+	if(complete === 'start'){
+	}
+	else if(complete === 'finish'){
+	}
+	else{
+		progress = complete+'%'
+	}
 	let item = `
 		<div class="file file-${fileid}">
 			<div class="icon"><div style="width:50px;height:50px"><img src="${fileLogo}"></div></div>
-			<div class="loader"><div style="width:50px;height:50px"><div class="progress">0%</div></div></div>
+			<div class="loader"><div style="width:50px;height:50px"><div class="progress">${progress}</div></div></div>
 			<div class="body">
 				<div class="name">${file.name}</div>
 				<div class="meta"><span class="size">${unit}</span> | <span class="note">${note}</span> <span class="to">${peer.name}</span></div> 
