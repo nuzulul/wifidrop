@@ -540,9 +540,13 @@ function fOfferFile(peer,filesid){
 		para.remove(); 
 	})
 
-
+	let namefiles = []
+	for(const file of datafiles){
+		const name = file.name
+		namefiles.push(name)
+	}
 	
-	const offer = {command:'offer',data:{length,size,filesid}}
+	const offer = {command:'offer',data:{length,size,filesid,namefiles}}
 	 fSendData(offer,peer.connectId)
 
 }
@@ -561,13 +565,23 @@ async function fAnswerFile(connectId,data){
 			return
 		}
 		
+		let list = '<ul>'
+		for(const name of data.namefiles){
+			const item = `<li>${fSafe(name)}</li>`
+			list += item
+		}
+		list += '</ul>'
+		
 		const para = document.createElement("div");
 		para.innerHTML = `
 			<div class="dialog answer answer-${data.filesid}">
 				<div id="parax" style="display:none;"><span style="font-size:30px;color:#fff;">X</span></div>
 				<div class="message">
 					<div class="title"><div style="padding:10px 10px;">${peer.name}</div></div>
-					<div class="content" >is sending you ${fSafe(data.length)} file(s) of ${getSizeUnit(fSafe(data.size))}</div>
+					<div class="content" >
+						<div>is sending you ${fSafe(data.length)} file(s) of ${getSizeUnit(fSafe(data.size))}</div>
+						<div style="height:100px;overflow:scroll;">${list}</div>
+					</div>
 					<div class="footer">
 						<button class="decline">DECLINE</button>
 						<button class="accept">ACCEPT></button>

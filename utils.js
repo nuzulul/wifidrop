@@ -185,7 +185,7 @@ export function getSizeUnit(size){
   const output =
 	exponent === 0
 	  ? `${numberOfBytes} bytes`
-	  : `${approx.toFixed(0)} ${
+	  : `${approx.toFixed(1)} ${
 		  units[exponent]
 		}`;
 	return output
