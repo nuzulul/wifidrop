@@ -297,11 +297,16 @@ h1 {
 	width:auto;
 }
 
+.dialog.options .message{
+	max-width:500px;
+}
+
 .options .content .item {
   line-height: 1.5;
   display: inline-block;
   vertical-align: middle;
   cursor:pointer;
+  display:block;
 }
 
 .options .content .item input,.options .content .item label{

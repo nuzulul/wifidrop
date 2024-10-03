@@ -760,7 +760,7 @@ async function fOpenOptions(){
 				</div>
 				<div class="item skipconfirmation">
 					<input type="checkbox" id="skipconfirmation" name="skipconfirmation" value="skipconfirmation" checked="${skipconfirmation}">
-					<label for="skipconfirmation"> Skip confirmation</label>
+					<label for="skipconfirmation"> Skip download confirmation</label>
 				</div>
 			</div>
 		</div>
