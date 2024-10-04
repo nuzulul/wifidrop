@@ -154,7 +154,7 @@ function fGenerateAvatar(seed,color){
 
 function fUpdateMe(){
 	const avatar = fGenerateAvatar(me.id,me.color)
-	document.querySelector('.peer.me .device-name').innerHTML = 'Me : '+me.name
+	document.querySelector('.peer.me .device-name').innerHTML = ''+me.name
 	document.querySelector('.peer.me .device').innerHTML = `
 		<img class="device-avatar" src="${avatar}">
 	`
@@ -452,8 +452,21 @@ async function fAddNewPeer(connectId,data){
 	}
 }
 
-function fSafe(data){
-	return data
+function escapehtmloldbrowser(s) {
+    let lookup = {
+        '&': "&amp;",
+        '"': "&quot;",
+        '\'': "&apos;",
+        '<': "&lt;",
+        '>': "&gt;"
+    };
+    return s.replace( /[&"'<>]/g, c => lookup[c] );
+}
+
+function fSafe(unsafe){
+	unsafe = String(unsafe);
+	var data = escapehtmloldbrowser(unsafe);
+	return data;
 }
 
 function fDeletePeer(connectId){
