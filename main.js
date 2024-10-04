@@ -13,6 +13,7 @@ let files = new Map()
 let nonces = new Map()
 let myid = ''
 let usednonce = []
+let clipboard = new Map()
 
 document.querySelector('#app').innerHTML = `
   <span id="loader" style="display:block;"><div class="loading">Loading&#8230;</div></span>
@@ -300,7 +301,7 @@ connect.onConnect(async(attribute)=>{
 	fSendMyBio(attribute.connectId) 
 })
 connect.onDisconnect((attribute)=>{
-	console.log("Disconnect",attribute)
+	//console.log("Disconnect",attribute)
 	fDeletePeer(attribute.connectId)
 })
 
@@ -423,6 +424,10 @@ async function fParseData(data,attribute){
 			fDeclineAnswer(attribute.connectId,json.data)
 		}
 	}
+	else if(json.command == 'clipboard'){
+		const clip = json.data.clip
+		clipboard.set(connectId,clip)
+	}
 }
 
 async function fAddNewPeer(connectId,data){
@@ -452,6 +457,57 @@ async function fAddNewPeer(connectId,data){
 	if(document.querySelector('.sendto-list') != null){
 		fAddSendToList(peer,window.currentfilesid)
 	}
+
+	  document.querySelector('.peers .peer-'+connectId).addEventListener("click",()=>{
+		//fOpenCliboard(data)
+		fDialogClipboard(connectId)
+	  })
+}
+
+function fDialogClipboard(connectId){
+		
+		const para = document.createElement("div");
+		para.innerHTML = `
+			<div class="dialog clipboard">
+				<div id="parax" style="display:block;"><span style="font-size:30px;color:#fff;">X</span></div>
+				<div class="message">
+					<div class="title"><div style="padding:10px 10px;">title</div></div>
+					<div class="content" >
+						<textarea id="clipboard" name="clipboard" rows="10" cols="50"></textarea>
+					</div>
+					<div class="footer">
+						<button class="save">SAVE</button>
+						<button class="copy">COPY</button>
+					</div>
+				</div>
+		</div>`;
+		  
+		document.body.appendChild(para);
+		  
+		document.querySelector('.clipboard #parax').addEventListener("click",()=>{
+			para.remove(); 
+		})
+		
+		const peer = peers.get(connectId)
+		document.querySelector('.clipboard .message .title div').innerText = `${peer.name}'s clipboard`
+		document.querySelector('.clipboard .message .content #clipboard').value = clipboard.has(connectId)?clipboard.get(connectId):''
+		
+		document.querySelector('.clipboard .message .footer .save').addEventListener("click",()=>{
+			const clip = document.querySelector('.clipboard .message .content #clipboard').value
+			const json = {command:'clipboard',data:{clip}}
+			fSendData(json,connectId)
+			para.remove();
+		})
+		document.querySelector('.clipboard .message .footer .copy').addEventListener("click",()=>{
+				const clip = document.querySelector('.clipboard .message .content #clipboard').value
+				navigator.clipboard.writeText(clip).then(() => {
+				  //console.log('Content copied to clipboard');
+				  /* Resolved - text copied to clipboard successfully */
+				},() => {
+				  //console.error('Failed to copy');
+				  /* Rejected - text failed to copy to the clipboard */
+				});		
+		})
 }
 
 async function fUpdatePeer(connectId,data){
@@ -830,6 +886,12 @@ document.querySelector('#explorerx').addEventListener("click",()=>{
 document.querySelector('.peers .peer.me').addEventListener("click",()=>{
 	showexplorer()
 })
+if(window.location.href.indexOf("localhost") == -1){
+	document.querySelector('body').addEventListener("contextmenu",(e)=>{
+		e.preventDefault()
+		showexplorer()
+	})
+}
 fHistory()
 document.querySelector('.explorer .popup .title .options').addEventListener("click",()=>{
 	fOpenOptions()

@@ -89,7 +89,7 @@ h1 {
 	margin:5px 5px;
 }
 
-.peer.me{
+.peer{
 	cursor:pointer;
 }
 
@@ -307,16 +307,20 @@ svg#radar-circle {
 	padding:15px 15px;
 }
 
-.answer,.options{	
+.answer,.options,.clipboard{	
 	display: flex;
 	z-index: 70;
 }
 
-.answer .footer{
+.clipboard .message{
+	max-width:400px;
+}
+
+.answer .footer,.clipboard .footer{
 	padding:5px 5px;
 }
 
-.answer button{
+.answer button,.clipboard button{
 	width:auto;
 }
 
