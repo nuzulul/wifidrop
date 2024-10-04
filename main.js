@@ -28,6 +28,28 @@ document.querySelector('#app').innerHTML = `
 		<div class="peer me">
 			<div class="device"></div>
 			<div class="device-name">DEVICE</div>
+			<div class="radar">
+
+				<svg id="radar-circle">
+				  <circle cx="50%" cy="50%" r="0" fill-opacity="0" stroke="blue" stroke-width="2px" stroke-opacity="1">
+					<animate attributeName="r" from="0" to="75" dur="3s" repeatCount="indefinite" />
+					<animate attributeName="stroke-opacity" from="1" to="0" dur="3s" repeatCount="indefinite"></animate>
+				  </circle>
+				  
+				  <circle cx="50%" cy="50%" r="0" fill-opacity="0" stroke="blue" stroke-width="2px" stroke-opacity="1">
+					<animate attributeName="r" from="0" to="75" dur="3s" repeatCount="indefinite" begin="0.75s" />
+					<animate attributeName="stroke-opacity" from="1" to="0" dur="3s" repeatCount="indefinite" begin="0.75s"></animate>
+				  </circle>
+				  
+				  <circle cx="50%" cy="50%" r="0" fill-opacity="0" stroke="blue" stroke-width="2px" stroke-opacity="1">
+					<animate attributeName="r" from="0" to="75" dur="3s" repeatCount="indefinite" begin="1.5s" />
+					<animate attributeName="stroke-opacity" from="1" to="0" dur="3s" repeatCount="indefinite" begin="1.5s"></animate>
+				  </circle>
+				  
+				  <circle cx="50%" cy="50%" r="5" fill="#C1D82F" stroke="#979797"></circle>
+				</svg>
+
+			</div>
 		</div>	
 	</div>
   </div>
