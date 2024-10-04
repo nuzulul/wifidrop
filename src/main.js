@@ -14,6 +14,10 @@ let nonces = new Map()
 let myid = ''
 let usednonce = []
 let clipboard = new Map()
+let dbMe
+let dbBio
+let dbHistory
+let connect
 
 document.querySelector('#app').innerHTML = `
   <span id="loader" style="display:block;"><div class="loading">Loading&#8230;</div></span>
@@ -69,69 +73,239 @@ const dropCallback = (data)=>{
 setupDrop(document.querySelector('#drop'),dropCallback)
 
 
+void async function main() {
 
-const dbMe = await KVStorage({
-	runtime:'browser',
-	storageName:'wifidropdbMe'
-})
+	dbMe = await KVStorage({
+		runtime:'browser',
+		storageName:'wifidropdbMe'
+	})
 
-const dbBio = await KVStorage({
-	runtime:'browser',
-	storageName:'wifidropdbBio'
-})
+	dbBio = await KVStorage({
+		runtime:'browser',
+		storageName:'wifidropdbBio'
+	})
 
-const dbHistory = await KVStorage({
-	runtime:'browser',
-	storageName:'wifidropdbHistory'
-})
+	dbHistory = await KVStorage({
+		runtime:'browser',
+		storageName:'wifidropdbHistory'
+	})
 
-const meList = await dbMe.list()
-if(meList.keys.length == 0){
-	const { publicKey, privateKey } = await window.crypto.subtle.generateKey(
-		{
-			name: "ECDSA",
-			namedCurve: "P-384",
-		},
-		true,
-		["sign", "verify"] 
-	);
-	const jwkpublicKey = await window.crypto.subtle.exportKey("jwk", publicKey)
-	const jwkprivateKey = await window.crypto.subtle.exportKey("jwk", privateKey)
-	me.jwkpublicKey = jwkpublicKey
-	me.jwkprivateKey = jwkprivateKey
-	const strpublicKey = JSON.stringify(jwkpublicKey)
-	me.publicKey = strpublicKey
-	await dbMe.put('publicKey',strpublicKey)
-	await dbMe.put('privateKey',JSON.stringify(jwkprivateKey))
-	const name = generateName()
-	me.name = name
-	await dbMe.put('name',name)
-	const id = btoa(strpublicKey)
-	me.id = id
-	var randomColor = Math.floor(Math.random()*16777215).toString(16);
-	await dbMe.put('color',randomColor)
-	me.color = randomColor
-	const skipconfirmation = false
-	await dbMe.put('skipconfirmation',skipconfirmation)
-	const key = base32hex.encode(strpublicKey)
-	me.key = key
-}else{
-	const strpublicKey = await dbMe.get('publicKey')
-	const jwkpublicKey = JSON.parse(strpublicKey)
-	const strprivateKey = await dbMe.get('privateKey')
-	const jwkprivateKey = JSON.parse(strprivateKey)
-	me.jwkpublicKey = jwkpublicKey
-	me.jwkprivateKey = jwkprivateKey
-	me.publicKey = strpublicKey
-	const name = await dbMe.get('name')
-	me.name = name
-	const id = btoa(strpublicKey)
-	me.id = id
-	const color = await dbMe.get('color')
-	me.color = color
-	const key = base32hex.encode(strpublicKey)
-	me.key = key
-}
+	const meList = await dbMe.list()
+	if(meList.keys.length == 0){
+		const { publicKey, privateKey } = await window.crypto.subtle.generateKey(
+			{
+				name: "ECDSA",
+				namedCurve: "P-384",
+			},
+			true,
+			["sign", "verify"] 
+		);
+		const jwkpublicKey = await window.crypto.subtle.exportKey("jwk", publicKey)
+		const jwkprivateKey = await window.crypto.subtle.exportKey("jwk", privateKey)
+		me.jwkpublicKey = jwkpublicKey
+		me.jwkprivateKey = jwkprivateKey
+		const strpublicKey = JSON.stringify(jwkpublicKey)
+		me.publicKey = strpublicKey
+		await dbMe.put('publicKey',strpublicKey)
+		await dbMe.put('privateKey',JSON.stringify(jwkprivateKey))
+		const name = generateName()
+		me.name = name
+		await dbMe.put('name',name)
+		const id = btoa(strpublicKey)
+		me.id = id
+		var randomColor = Math.floor(Math.random()*16777215).toString(16);
+		await dbMe.put('color',randomColor)
+		me.color = randomColor
+		const skipconfirmation = false
+		await dbMe.put('skipconfirmation',skipconfirmation)
+		const key = base32hex.encode(strpublicKey)
+		me.key = key
+	}else{
+		const strpublicKey = await dbMe.get('publicKey')
+		const jwkpublicKey = JSON.parse(strpublicKey)
+		const strprivateKey = await dbMe.get('privateKey')
+		const jwkprivateKey = JSON.parse(strprivateKey)
+		me.jwkpublicKey = jwkpublicKey
+		me.jwkprivateKey = jwkprivateKey
+		me.publicKey = strpublicKey
+		const name = await dbMe.get('name')
+		me.name = name
+		const id = btoa(strpublicKey)
+		me.id = id
+		const color = await dbMe.get('color')
+		me.color = color
+		const key = base32hex.encode(strpublicKey)
+		me.key = key
+	}
+	
+	fUpdateMe()
+	fHistory()
+
+	//////////////////////connection///////////////////////////////////////////////////////////
+	const stunurls = config.CONFIG_WEBRTC_STUN_URLS
+	const stunurlsbackup = config.CONFIG_WEBRTC_STUN_URLS_BACKUP
+
+	const turnurls = atob(config.CONFIG_WEBRTC_TURN_HOST)
+	const turnusername = atob(config.CONFIG_WEBRTC_TURN_USER)
+	const turncredential = atob(config.CONFIG_WEBRTC_TURN_PWD)
+
+	const turnurlsbackup = atob(config.CONFIG_WEBRTC_TURN_HOST_BACKUP)
+	const turnusernamebackup = atob(config.CONFIG_WEBRTC_TURN_USER_BACKUP)
+	const turncredentialbackup = atob(config.CONFIG_WEBRTC_TURN_PWD_BACKUP)
+
+	async function checkice(stunurls,turnurls,turnusername,turncredential,time){
+		return new Promise((resolve)=>{
+			
+			let stun = false
+			let turn = false
+			
+			const timeout = setTimeout(()=>{
+				let ice = []
+				ice.push(stun)
+				ice.push(turn)
+				resolve(ice)
+			},time)
+			
+			function check(){
+				if(stun && turn){
+					let ice = []
+					ice.push(stun)
+					ice.push(turn)
+					clearTimeout(timeout)
+					resolve(ice)
+				}
+			}
+			
+			//test ice servers
+			
+			const iceServers = [
+				{
+					urls: stunurls
+				},
+				{
+					urls: turnurls, 
+					username: turnusername, 
+					credential: turncredential
+				}
+			];
+
+			const pc = new RTCPeerConnection({
+				iceServers
+			});
+
+			pc.onicecandidate = (e) => {
+				if (!e.candidate) return;
+
+				//console.log(e.candidate.candidate);
+				//console.log(e.candidate);
+
+				// stun works
+				if(e.candidate.type == "srflx"){
+					//console.log('publicip',e.candidate.address);
+					//console.log('publicport',e.candidate.port);
+					//console.log('candidate',e.candidate);
+					me.address = e.candidate.address
+					me.priority = e.candidate.priority
+					stun = 	{
+								urls: stunurls
+							}
+					check()
+				}
+
+				// turn works
+				if(e.candidate.type == "relay"){
+					turn =  {
+								urls: turnurls, 
+								username: turnusername, 
+								credential: turncredential
+							}
+					check()
+				}
+			};
+
+			pc.onicecandidateerror = (e) => {
+				console.debug(e);
+			};
+
+			pc.createDataChannel('webpeerjs');
+			pc.createOffer().then(offer => pc.setLocalDescription(offer));
+		})
+	}
+
+	let ice = []
+
+	ice = await checkice(stunurls,turnurls,turnusername,turncredential,5000)
+
+	//console.log(ice)
+
+	//recheck ice
+	if(!ice[0] && !ice[1]){
+		ice = await checkice(stunurlsbackup,turnurlsbackup,turnusernamebackup,turncredentialbackup,5000)
+	}else if (ice[0] && !ice[1]){
+		ice = await checkice(stunurls,turnurlsbackup,turnusernamebackup,turncredentialbackup,5000)
+	}else if (!ice[0] && ice[1]){
+		ice = await checkice(stunurlsbackup,turnurls,turnusername,turncredential,5000)
+	}
+
+	//console.log(ice)
+
+	//final ice remove false value
+	ice.forEach(function(value, index) {
+	  if(!value){
+		  this.splice(index, 1)
+	  }
+	}, ice);
+
+	//console.log('ice',ice)
+	//console.log('me',me)
+
+
+	connect = webconnect({
+		appName:"WIFIDrop",
+		channelName:"WIFIDropRoom",
+		connectPassword:me.address+me.priority,
+		iceConfiguration:{config:{iceServers:ice}}
+	})
+	connect.getMyId((attribute) => myid = attribute.connectId)
+	connect.onConnect(async(attribute)=>{
+		//console.log("Connect",attribute)
+		//connect.Send("hello",{connectId:attribute.connectId})
+		//console.log(await connect.Ping({connectId:attribute.connectId}))
+		connect.getConnection((attribute)=>{
+			//console.log("Connection",attribute)
+		})
+		fSendMyBio(attribute.connectId) 
+	})
+	connect.onDisconnect((attribute)=>{
+		//console.log("Disconnect",attribute)
+		fDeletePeer(attribute.connectId)
+	})
+
+	connect.onReceive((data,attribute) =>{
+		//console.log(data,attribute)
+		if(attribute.metadata == undefined){
+			fParseData(data,attribute)
+		}else{
+			fReceiveData(data,attribute)
+		}
+	})
+	connect.onReceiveProgress((attribute) => {
+		//console.log(`Receiving progress : ${attribute.percent} from ${attribute.connectId} metadata ${attribute.metadata}`)
+		if(attribute.metadata != undefined){
+			fReceiveFileProgress(attribute)
+		}
+	})
+	connect.onSendProgress((attribute) => {
+		//console.log(`Sending progress : ${attribute.percent} to ${attribute.connectId}`)
+		//console.log('attribute',attribute)
+		if(attribute.metadata != undefined){
+			fSendFileProgress(attribute)
+		}
+	})
+	//////////////////////connection///////////////////////////////////////////////////////////
+
+
+}()
 
 async function fHistory(){
 	const fileHistory = await dbHistory.list()
@@ -162,171 +336,9 @@ function fUpdateMe(){
 	`
 }
 
-fUpdateMe()
 
 
-//////////////////////connection///////////////////////////////////////////////////////////
-const stunurls = config.CONFIG_WEBRTC_STUN_URLS
-const stunurlsbackup = config.CONFIG_WEBRTC_STUN_URLS_BACKUP
 
-const turnurls = atob(config.CONFIG_WEBRTC_TURN_HOST)
-const turnusername = atob(config.CONFIG_WEBRTC_TURN_USER)
-const turncredential = atob(config.CONFIG_WEBRTC_TURN_PWD)
-
-const turnurlsbackup = atob(config.CONFIG_WEBRTC_TURN_HOST_BACKUP)
-const turnusernamebackup = atob(config.CONFIG_WEBRTC_TURN_USER_BACKUP)
-const turncredentialbackup = atob(config.CONFIG_WEBRTC_TURN_PWD_BACKUP)
-
-async function checkice(stunurls,turnurls,turnusername,turncredential,time){
-	return new Promise((resolve)=>{
-		
-		let stun = false
-		let turn = false
-		
-		const timeout = setTimeout(()=>{
-			let ice = []
-			ice.push(stun)
-			ice.push(turn)
-			resolve(ice)
-		},time)
-		
-		function check(){
-			if(stun && turn){
-				let ice = []
-				ice.push(stun)
-				ice.push(turn)
-				clearTimeout(timeout)
-				resolve(ice)
-			}
-		}
-		
-		//test ice servers
-		
-		const iceServers = [
-			{
-				urls: stunurls
-			},
-			{
-				urls: turnurls, 
-				username: turnusername, 
-				credential: turncredential
-			}
-		];
-
-		const pc = new RTCPeerConnection({
-			iceServers
-		});
-
-		pc.onicecandidate = (e) => {
-			if (!e.candidate) return;
-
-			//console.log(e.candidate.candidate);
-			//console.log(e.candidate);
-
-			// stun works
-			if(e.candidate.type == "srflx"){
-				//console.log('publicip',e.candidate.address);
-				//console.log('publicport',e.candidate.port);
-				//console.log('candidate',e.candidate);
-				me.address = e.candidate.address
-				me.priority = e.candidate.priority
-				stun = 	{
-							urls: stunurls
-						}
-				check()
-			}
-
-			// turn works
-			if(e.candidate.type == "relay"){
-				turn =  {
-							urls: turnurls, 
-							username: turnusername, 
-							credential: turncredential
-						}
-				check()
-			}
-		};
-
-		pc.onicecandidateerror = (e) => {
-			console.debug(e);
-		};
-
-		pc.createDataChannel('webpeerjs');
-		pc.createOffer().then(offer => pc.setLocalDescription(offer));
-	})
-}
-
-let ice = []
-
-ice = await checkice(stunurls,turnurls,turnusername,turncredential,5000)
-
-//console.log(ice)
-
-//recheck ice
-if(!ice[0] && !ice[1]){
-	ice = await checkice(stunurlsbackup,turnurlsbackup,turnusernamebackup,turncredentialbackup,5000)
-}else if (ice[0] && !ice[1]){
-	ice = await checkice(stunurls,turnurlsbackup,turnusernamebackup,turncredentialbackup,5000)
-}else if (!ice[0] && ice[1]){
-	ice = await checkice(stunurlsbackup,turnurls,turnusername,turncredential,5000)
-}
-
-//console.log(ice)
-
-//final ice remove false value
-ice.forEach(function(value, index) {
-  if(!value){
-	  this.splice(index, 1)
-  }
-}, ice);
-
-//console.log('ice',ice)
-//console.log('me',me)
-
-
-const connect = webconnect({
-	appName:"WIFIDrop",
-	channelName:"WIFIDropRoom",
-	connectPassword:me.address+me.priority,
-	iceConfiguration:{config:{iceServers:ice}}
-})
-connect.getMyId((attribute) => myid = attribute.connectId)
-connect.onConnect(async(attribute)=>{
-	//console.log("Connect",attribute)
-	//connect.Send("hello",{connectId:attribute.connectId})
-	//console.log(await connect.Ping({connectId:attribute.connectId}))
-	connect.getConnection((attribute)=>{
-		//console.log("Connection",attribute)
-	})
-	fSendMyBio(attribute.connectId) 
-})
-connect.onDisconnect((attribute)=>{
-	//console.log("Disconnect",attribute)
-	fDeletePeer(attribute.connectId)
-})
-
-connect.onReceive((data,attribute) =>{
-	//console.log(data,attribute)
-	if(attribute.metadata == undefined){
-		fParseData(data,attribute)
-	}else{
-		fReceiveData(data,attribute)
-	}
-})
-connect.onReceiveProgress((attribute) => {
-	//console.log(`Receiving progress : ${attribute.percent} from ${attribute.connectId} metadata ${attribute.metadata}`)
-	if(attribute.metadata != undefined){
-		fReceiveFileProgress(attribute)
-	}
-})
-connect.onSendProgress((attribute) => {
-	//console.log(`Sending progress : ${attribute.percent} to ${attribute.connectId}`)
-	//console.log('attribute',attribute)
-	if(attribute.metadata != undefined){
-		fSendFileProgress(attribute)
-	}
-})
-//////////////////////connection///////////////////////////////////////////////////////////
 
 
 function fSendMyBio(connectId){
@@ -892,7 +904,7 @@ if(window.location.href.indexOf("localhost") == -1){
 		showexplorer()
 	})
 }
-fHistory()
+
 document.querySelector('.explorer .popup .title .options').addEventListener("click",()=>{
 	fOpenOptions()
 })
