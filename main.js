@@ -12,6 +12,7 @@ let peers = new Map()
 let files = new Map()
 let nonces = new Map()
 let myid = ''
+let usednonce = []
 
 document.querySelector('#app').innerHTML = `
   <span id="loader" style="display:block;"><div class="loading">Loading&#8230;</div></span>
@@ -740,13 +741,12 @@ async function fReceiveFileProgress(attribute){
 		await dbHistory.put(fileid,item)
 		//change background colour
 		document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
-		nonces.delete(nonceid)
+		fDeleteNonce(nonceid)
 	}
 	
 }
 
 function fReceiveData(data,attribute){
-	
 	const connectId = attribute.connectId
 	const metadata = attribute.metadata
 	const name = metadata.name
@@ -757,7 +757,6 @@ function fReceiveData(data,attribute){
 	const noncedata = nonces.get(nonceid)
 	if(connectId != noncedata.connectId || name != noncedata.name || size != noncedata.size || type != noncedata.type)return
 	
-	
 	  let blob1 = new Blob([new Uint8Array(data)],{type:attribute.metadata.type})
 
       const aElement = document.createElement('a');
@@ -767,7 +766,15 @@ function fReceiveData(data,attribute){
       aElement.setAttribute('target', '_blank');
       aElement.click();
       URL.revokeObjectURL(href);
+	  fDeleteNonce(nonceid)
+}
 
+function fDeleteNonce(nonceid){
+	if(usednonce.includes(nonceid)){
+		setTimeout(()=>{nonces.delete(nonceid)},100)
+	}else{
+		usednonce.push(nonceid)
+	}
 }
 
 async function fSendFileProgress(attribute){
@@ -970,6 +977,37 @@ function fAddExplorerFile(peer,file,fileid,time,send,complete){
 	document.querySelector('.explorer .files').innerHTML += item
 	const scroller = document.querySelector('.scroller')
 	scroller.scrollTop = scroller.scrollHeight
+}
+
+if(window.location.href.indexOf("localhost") == -1){
+	window.addEventListener('error', (event) => {
+	  // An uncaught exception occurred. It will be logged in the console.
+	  event.preventDefault();
+	  
+	  // Get the error properties from the error event object
+	  const { message, filename, lineno, colno, error } = event;
+	  
+	  // Output, if desired.
+	  //console.log('Captured uncaught exception:', message, filename, lineno, colno, error.stack);
+	  
+	});
+
+	window.addEventListener('unhandledrejection', (event) => {
+	  // code for handling the unhandled rejection
+	  // the event object has two special properties:
+	  
+	  // [object Promise] - The JavaScript Promise that was rejected.
+	  // Reference: https://developer.mozilla.org/en-US/docs/Web/API/PromiseRejectionEvent/promise
+	  //console.log(event.promise); 
+	  
+	  // Error: Whoops! - A value or Object indicating why the promise was rejected, as passed to Promise.reject().
+	  // Reference: https://developer.mozilla.org/en-US/docs/Web/API/PromiseRejectionEvent/reason
+	  //console.log(event.reason); 
+
+	  // Prevent the default handling (such as outputting the error to the console)
+	  // Reference: https://developer.mozilla.org/en-US/docs/Web/API/Window/unhandledrejection_event#preventing_default_handling
+	  event.preventDefault();
+	});
 }
 
 

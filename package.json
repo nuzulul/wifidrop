@@ -14,7 +14,7 @@
     "rollup": "^4.23.0",
     "source-map-js": "^1.2.1",
     "vite": "^5.4.8",
-    "webconnect": "^0.0.7"
+    "webconnect": "^0.0.9"
   },
   "devDependencies": {
     "vite": "^5.4.8"
