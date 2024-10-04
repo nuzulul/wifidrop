@@ -404,6 +404,7 @@ async function fParseData(data,attribute){
 	if(json.command == 'announce'){
 		if(peers.has(connectId)){
 			//update
+			fUpdatePeer(connectId,json.data)
 		}else{
 			//new
 			fAddNewPeer(connectId,json.data)
@@ -449,6 +450,16 @@ async function fAddNewPeer(connectId,data){
 	//add to send to list
 	if(document.querySelector('.sendto-list') != null){
 		fAddSendToList(peer,window.currentfilesid)
+	}
+}
+
+async function fUpdatePeer(connectId,data){
+	let peer = peers.get(connectId)
+	peer.name = data.name
+	peers.set(connectId,peer)
+	const nodeList = document.querySelectorAll('.peer.peer-'+connectId+' .device-name')
+	for(const node of nodeList){
+		node.innerText = peer.name
 	}
 }
 
@@ -848,6 +859,13 @@ async function fOpenOptions(){
 					<input type="checkbox" id="skipconfirmation" name="skipconfirmation" value="skipconfirmation" ${checkboxskipconfirmation}>
 					<label for="skipconfirmation"> Skip download confirmation</label>
 				</div>
+				<div class="item alias">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-laptop" viewBox="0 0 16 16">
+					  <path d="M13.5 3a.5.5 0 0 1 .5.5V11H2V3.5a.5.5 0 0 1 .5-.5zm-11-1A1.5 1.5 0 0 0 1 3.5V12h14V3.5A1.5 1.5 0 0 0 13.5 2zM0 12.5h16a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 12.5"/>
+					</svg>					
+					<label for="alias">Alias:</label>
+					<input style="border:none" type="text" id="alias" name="alias" value="${me.name}">
+				</div>
 			</div>
 		</div>
 	</div>`;
@@ -883,6 +901,32 @@ async function fOpenOptions(){
 		await dbMe.put('skipconfirmation',data.checked)
 	})	
 
+    var alias = document.getElementById("alias");
+    alias.addEventListener("keypress", async function(event) {
+      if (event.key === "Enter") {
+			event.preventDefault();
+			const el = `
+				<span class="check">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
+					  <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"/>
+					</svg>		
+				</span>
+			`        
+			document.querySelector('.options .content .alias #alias').blur()
+			document.querySelector('.options .content .alias svg').insertAdjacentHTML("afterend",el)
+			setTimeout(()=>{
+				if(document.querySelector('.options .content .alias .check'))document.querySelector('.options .content .alias .check').remove()
+			},3000)
+			const name = document.querySelector('.options .content .alias #alias').value
+			me.name = name
+			await dbMe.put('name',name)
+			fUpdateMe()
+			for(const peer of peers){
+				const connectId = peer[0]
+				fSendMyBio(connectId)
+			}
+      }
+    });
 }
 
 
