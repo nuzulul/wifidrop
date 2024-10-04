@@ -64,11 +64,11 @@ export function setupDrop(element,callback) {
 	}
 	
 	function addAnimation(){
-		element.style.borderColor = '#646cff'
+		document.querySelector('.frame').style.borderColor = '#646cff'
 	}
 	
 	function removeAnimation(){
-		element.style.borderColor = 'transparent'
+		document.querySelector('.frame').style.borderColor = '#d7d8da'
 	}
 
 }
