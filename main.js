@@ -10,6 +10,7 @@ import * as config from  './config.js'
 let me = {}
 let peers = new Map()
 let files = new Map()
+let nonces = new Map()
 let myid = ''
 
 document.querySelector('#app').innerHTML = `
@@ -510,11 +511,6 @@ function fAddSendToList(peer,filesid){
 
 	/*waitForElm('.sendto-list .peer.peer-'+peer.connectId).then((elm) => {
 		console.log(elm.textContent)
-		elm.addEventListener("click",()=>{ 
-			console.log('click')
-			fSendFile(peer,files)
-		})
-		
 	});*/
 
 }
@@ -543,7 +539,10 @@ function fOfferFile(peer,filesid){
 	let namefiles = []
 	for(const file of datafiles){
 		const name = file.name
-		namefiles.push(name)
+		const size = file.size
+		const type = file.type
+		const item = {name,size,type}
+		namefiles.push(item)
 	}
 	
 	const offer = {command:'offer',data:{length,size,filesid,namefiles}}
@@ -559,15 +558,13 @@ async function fAnswerFile(connectId,data){
 		const skipconfirmation = await dbMe.get('skipconfirmation')
 		
 		if(skipconfirmation){
-			const filesid = data.filesid
-			const answer = {command:'answer',data:{value:true,filesid}}
-			fSendData(answer,connectId)
+			fSendAccept(data,connectId)
 			return
 		}
 		
 		let list = '<ul>'
-		for(const name of data.namefiles){
-			const item = `<li>${fSafe(name)}</li>`
+		for(const namefile of data.namefiles){
+			const item = `<li>${fSafe(namefile.name)}</li>`
 			list += item
 		}
 		list += '</ul>'
@@ -604,25 +601,41 @@ async function fAnswerFile(connectId,data){
 
 		document.querySelector('.answer.answer-'+data.filesid+' .accept').addEventListener("click",()=>{
 			para.remove(); 
-			const filesid = data.filesid
-			const answer = {command:'answer',data:{value:true,filesid}}
-			fSendData(answer,connectId)
+			fSendAccept(data,connectId)
 		})
 	}
 }
 
+function fSendAccept(data,connectId){
+	
+	let nonce = []
+	
+	for(const namefile of data.namefiles){
+		const time = (new Date()).getTime()
+		let nonceid = btoa(namefile.name+namefile.size+namefile.size.toString()+time.toString()+ Math.floor(Math.random() * 1000000))
+		nonce.push(nonceid)
+		const noncedata = {nonceid,connectId,...namefile}
+		nonces.set(nonceid,noncedata)
+	}
+	
+	const filesid = data.filesid
+	const answer = {command:'answer',data:{value:true,filesid,nonce}}
+	fSendData(answer,connectId)
+}
+
 function fAcceptAnswer(connectId,data){
 	if(document.querySelector('.offer.offer-'+data.filesid))document.querySelector('.offer.offer-'+data.filesid).remove()
-	const filesid = data.filesid
-	fSendFile(connectId,filesid)
+	fSendFile(connectId,data)
 }
 
 function fDeclineAnswer(connectId,data){
 	if(document.querySelector('.offer.offer-'+data.filesid))document.querySelector('.offer.offer-'+data.filesid).remove()
 }
 
-async function fSendFile(connectId,filesid){
+async function fSendFile(connectId,data){
 	showexplorer()
+	const filesid = data.filesid
+	const nonce = data.nonce
 	const peer = peers.get(connectId)
 	const publicKey = JSON.stringify(peer.jwkpublicKey)
 	const key = base32hex.encode(publicKey)
@@ -632,22 +645,18 @@ async function fSendFile(connectId,filesid){
 	for(const file of datafiles){
 		const time = (new Date()).getTime()
 		const fileid = file.size.toString()+time.toString()+ Math.floor(Math.random() * 1000000)
-		//console.log('send',fileid)
+		const nonceid = nonce.shift()
 		
 		setTimeout(()=>{
 			fAddExplorerFile(peer,file,fileid,time,send,complete)
 			let reader = new FileReader();
 			reader.onload = function() {
 				let arrayBuffer = this.result
-				const attribute = {connectId,metadata:{fileid,name:file.name, type: file.type,size:file.size}}
+				const attribute = {connectId,metadata:{fileid,name:file.name, type: file.type,size:file.size,nonceid}}
 				connect.Send(arrayBuffer,attribute)
 			}
 			reader.readAsArrayBuffer(file);	
 		},500)
-		
-		//save to dbHistory
-		//const item = {author:key,fileid,time,name:file.name,size:file.size,send,complete}
-		//await dbHistory.put(fileid,item)
 		
 	
 	}
@@ -663,11 +672,16 @@ async function fReceiveFileProgress(attribute){
 	const fileid = metadata.fileid
 	const name = metadata.name
 	const size = metadata.size
+	const type = metadata.type
+	const nonceid = metadata.nonceid
+	if(!nonces.has(nonceid))return
+	const noncedata = nonces.get(nonceid)
 	const time = (new Date()).getTime()
 	const send = false
 	const complete = Math.floor(percent*100)
 	const file = {name,size}
 	if(!document.querySelector('.file.file-'+fileid)){
+		if(connectId != noncedata.connectId || name != noncedata.name || size != noncedata.size || type != noncedata.type)return
 		showexplorer()
 		fAddExplorerFile(peer,file,fileid,time,send,complete)
 	}else{
@@ -680,13 +694,25 @@ async function fReceiveFileProgress(attribute){
 		await dbHistory.put(fileid,item)
 		//change background colour
 		document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
+		nonces.delete(nonceid)
 	}
 	
 }
 
 function fReceiveData(data,attribute){
 	
-	let blob1 = new Blob([new Uint8Array(data)],{type:attribute.metadata.type})
+	const connectId = attribute.connectId
+	const metadata = attribute.metadata
+	const name = metadata.name
+	const size = metadata.size
+	const type = metadata.type
+	const nonceid = metadata.nonceid
+	if(!nonces.has(nonceid))return
+	const noncedata = nonces.get(nonceid)
+	if(connectId != noncedata.connectId || name != noncedata.name || size != noncedata.size || type != noncedata.type)return
+	
+	
+	  let blob1 = new Blob([new Uint8Array(data)],{type:attribute.metadata.type})
 
       const aElement = document.createElement('a');
       aElement.setAttribute('download', attribute.metadata.name);
