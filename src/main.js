@@ -1,5 +1,5 @@
 import './style.css'
-import wifidropLogo from './wifidrop.svg'
+import wifidropLogo from './icon-512.png'
 import fileLogo from './file.svg'
 import { setupDrop } from './drop.js'
 import {KVStorage} from 'kv-storage'
