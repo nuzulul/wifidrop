@@ -137,6 +137,9 @@ void async function main() {
 		const key = base32hex.encode(strpublicKey)
 		me.key = key
 	}
+
+	var randomColor = Math.floor(Math.random()*16777215).toString(16);
+	me.varian = randomColor
 	
 	fUpdateMe()
 	fHistory()
@@ -266,7 +269,10 @@ void async function main() {
 		connectPassword:me.address+me.priority,
 		iceConfiguration:{config:{iceServers:ice}}
 	})
-	connect.getMyId((attribute) => myid = attribute.connectId)
+	connect.getMyId((attribute) => {
+		myid = attribute.connectId
+		fUpdateMe()
+	})
 	connect.onConnect(async(attribute)=>{
 		//console.log("Connect",attribute)
 		//connect.Send("hello",{connectId:attribute.connectId})
@@ -330,7 +336,7 @@ function fGenerateAvatar(seed,color){
 
 function fUpdateMe(){
 	const avatar = fGenerateAvatar(me.id,me.color)
-	document.querySelector('.peer.me .device-name').innerHTML = ''+me.name
+	document.querySelector('.peer.me .device-name').innerHTML = `<span class="varian" style="background:#${me.varian};"></span>`+me.name
 	document.querySelector('.peer.me .device').innerHTML = `
 		<img class="device-avatar" src="${avatar}">
 	`
@@ -342,7 +348,7 @@ function fUpdateMe(){
 
 
 function fSendMyBio(connectId){
-	const mybio = {command:'announce',data:{name:me.name,color:me.color}}
+	const mybio = {command:'announce',data:{name:me.name,color:me.color,varian:me.varian}}
 	 fSendData(mybio,connectId)
 }
 
@@ -460,7 +466,7 @@ async function fAddNewPeer(connectId,data){
 	const el = `
 		<div class="peer peer-${connectId}">
 			<div class="device"><img class="device-avatar" src="${avatar}"></div>
-			<div class="device-name">${fSafe(peer.name)}</div>
+			<div class="device-name"><span class="varian" style="background:#${fSafe(peer.varian)};"></span>${fSafe(peer.name)}</div>
 		</div>
 	`
 	document.querySelector('.peers .peer.me').insertAdjacentHTML("afterend",el)
@@ -483,9 +489,9 @@ function fDialogClipboard(connectId){
 			<div class="dialog clipboard">
 				<div id="parax" style="display:block;"><span style="font-size:30px;color:#fff;">X</span></div>
 				<div class="message">
-					<div class="title"><div style="padding:10px 10px;">title</div></div>
+					<div class="title"><div class="device-name" style="padding:10px 10px;">title</div></div>
 					<div class="content" >
-						<textarea id="clipboard" name="clipboard" rows="10" cols="50"></textarea>
+						<textarea id="clipboard" name="clipboard" rows="10" cols="30"></textarea>
 					</div>
 					<div class="footer">
 						<button class="save">SAVE</button>
@@ -501,24 +507,47 @@ function fDialogClipboard(connectId){
 		})
 		
 		const peer = peers.get(connectId)
-		document.querySelector('.clipboard .message .title div').innerText = `${peer.name}'s clipboard`
+		document.querySelector('.clipboard .message .title div').innerHTML = `<span class="varian" style="background:#${fSafe(peer.varian)};"></span>${fSafe(peer.name)}'s clipboard`
 		document.querySelector('.clipboard .message .content #clipboard').value = clipboard.has(connectId)?clipboard.get(connectId):''
 		
 		document.querySelector('.clipboard .message .footer .save').addEventListener("click",()=>{
 			const clip = document.querySelector('.clipboard .message .content #clipboard').value
 			const json = {command:'clipboard',data:{clip}}
 			fSendData(json,connectId)
-			para.remove();
+			//para.remove();
+			const check = `
+				<span class="check">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
+					  <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"/>
+					</svg>		
+				</span>`
+			const el = '.clipboard .message .footer .save'
+			document.querySelector(el).insertAdjacentHTML("afterbegin",check)
+			setTimeout(()=>{
+				if(document.querySelector(el+' .check'))document.querySelector(el+' .check').remove()
+			},3000)
 		})
 		document.querySelector('.clipboard .message .footer .copy').addEventListener("click",()=>{
 				const clip = document.querySelector('.clipboard .message .content #clipboard').value
 				navigator.clipboard.writeText(clip).then(() => {
 				  //console.log('Content copied to clipboard');
 				  /* Resolved - text copied to clipboard successfully */
+					const check = `
+						<span class="check">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
+							  <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"/>
+							</svg>		
+						</span>`
+					const el = '.clipboard .message .footer .copy'
+					document.querySelector(el).insertAdjacentHTML("afterbegin",check)
+					setTimeout(()=>{
+						if(document.querySelector(el+' .check'))document.querySelector(el+' .check').remove()
+					},3000)
 				},() => {
 				  //console.error('Failed to copy');
 				  /* Rejected - text failed to copy to the clipboard */
 				});		
+
 		})
 }
 
@@ -604,7 +633,7 @@ function fAddSendToList(peer,filesid){
 	const el = `
 		<div class="peer peer-${peer.connectId}" data-peer="${peer.connectId}">
 			<div class="device"><img class="device-avatar" src="${avatar}"></div>
-			<div class="device-name">${fSafe(peer.name)}</div>
+			<div class="device-name"><span class="varian" style="background:#${fSafe(peer.varian)};"></span>${fSafe(peer.name)}</div>
 		</div>
 	`
 	
@@ -944,7 +973,7 @@ async function fOpenOptions(){
 					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-laptop" viewBox="0 0 16 16">
 					  <path d="M13.5 3a.5.5 0 0 1 .5.5V11H2V3.5a.5.5 0 0 1 .5-.5zm-11-1A1.5 1.5 0 0 0 1 3.5V12h14V3.5A1.5 1.5 0 0 0 13.5 2zM0 12.5h16a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 12.5"/>
 					</svg>					
-					<label for="alias">Alias:</label>
+					<label for="alias">Change alias:</label>
 					<input style="border:none" type="text" id="alias" name="alias" value="${me.name}">
 				</div>
 			</div>
