@@ -1,7 +1,7 @@
 {
   "id": "WIFIDrop",
   "background_color": "#ffffff",
-  "description": "Instant WIFI Drop File Transfer",
+  "description": "Instant WIFI Drop P2P Large File Transfer",
   "dir": "ltr",
   "display": "standalone",
   "name": "WIFIDrop",

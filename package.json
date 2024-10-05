@@ -1,23 +1,22 @@
 {
   "name": "wifidrop",
   "version": "0.0.1",
-  "description": "Instant WIFI File Transfer",
+  "description": "Instant WIFI Drop P2P Large File Transfer",
   "main": "main.js",
   "private": true,
   "type": "module",
   "dependencies": {
-    "esbuild": "^0.21.5",
     "kv-storage": "^0.0.9",
+    "webconnect": "^0.0.9"
+  },
+  "devDependencies": {
+    "vite": "^5.4.8",
     "nanoid": "^3.3.7",
     "picocolors": "^1.1.0",
     "postcss": "^8.4.47",
     "rollup": "^4.23.0",
     "source-map-js": "^1.2.1",
-    "vite": "^5.4.8",
-    "webconnect": "^0.0.9"
-  },
-  "devDependencies": {
-    "vite": "^5.4.8"
+	"esbuild": "^0.21.5"
   },
   "scripts": {
     "start": "npm run dev",
@@ -33,7 +32,7 @@
     "url": "git+https://github.com/nuzulul/wifidrop.git"
   },
   "keywords": [
-    "file-transfer"
+    "file-transfer","file-sharing","file-upload"
   ],
   "author": "Nuzulul Zulkarnain",
   "license": "MIT",

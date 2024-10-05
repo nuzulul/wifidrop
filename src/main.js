@@ -58,6 +58,7 @@ document.querySelector('#app').innerHTML = `
 			</div>
 		</div>	
 	</div>
+	<div class="attribution">WIFIDrop &copy; 2024 - Instant WIFI Drop P2P Large File Transfer</div>
   </div>
 `
 
