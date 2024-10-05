@@ -445,6 +445,9 @@ async function fParseData(data,attribute){
 	else if(json.command == 'clipboard'){
 		const clip = json.data.clip
 		clipboard.set(connectId,clip)
+		if(document.querySelector('.clipboard.clipboard-'+connectId)){
+			document.querySelector('.clipboard .message .content #clipboard').value = clip
+		}
 	}
 }
 
@@ -486,7 +489,7 @@ function fDialogClipboard(connectId){
 		
 		const para = document.createElement("div");
 		para.innerHTML = `
-			<div class="dialog clipboard">
+			<div class="dialog clipboard clipboard-${fSafe(connectId)}">
 				<div id="parax" style="display:block;"><span style="font-size:30px;color:#fff;">X</span></div>
 				<div class="message">
 					<div class="title"><div class="device-name" style="padding:10px 10px;">title</div></div>
@@ -513,6 +516,7 @@ function fDialogClipboard(connectId){
 		document.querySelector('.clipboard .message .footer .save').addEventListener("click",()=>{
 			const clip = document.querySelector('.clipboard .message .content #clipboard').value
 			const json = {command:'clipboard',data:{clip}}
+			clipboard.set(connectId,clip)
 			fSendData(json,connectId)
 			//para.remove();
 			const check = `
