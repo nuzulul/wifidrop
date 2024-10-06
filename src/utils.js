@@ -202,6 +202,7 @@ export function webrtcgarbagecollector(){
 		peer = null;
 	  }, 10);
 	  //console.log(i++);
+	  i++
 	  if (!(i % 20)) {
 		// try to invoke GC on each 20ish iteration
 		queueMicrotask(() => { 
