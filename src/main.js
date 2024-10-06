@@ -286,6 +286,7 @@ void async function main() {
 	connect.onDisconnect((attribute)=>{
 		//console.log("Disconnect",attribute)
 		fDeletePeer(attribute.connectId)
+		fStopAction(attribute.connectId)
 	})
 
 	connect.onReceive((data,attribute) =>{
@@ -594,6 +595,22 @@ function fDeletePeer(connectId){
 	}
 }
 
+function fStopAction(connectId){
+	//change color file to red on disconnect
+	const nodeList = document.querySelectorAll('.file.connect-'+connectId)
+	for(const node of nodeList){
+		const complete = node.dataset.complete
+		if(complete !== '100'){
+			node.style.backgroundColor = '#b81127';
+		}
+
+	}
+	//remove clipboard on disconnect
+	if(document.querySelector('.clipboard.clipboard-'+connectId)){
+		document.querySelector('.clipboard.clipboard-'+connectId).remove()
+	}
+}
+
 function fOpenPeers(filesid){
 	
 	let datafiles = files.get(filesid)
@@ -859,6 +876,7 @@ async function fReceiveFileProgress(attribute){
 		await dbHistory.put(fileid,item)
 		//change background colour
 		document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
+		document.querySelector('.file.file-'+fileid).dataset.complete = complete
 		fDeleteNonce(nonceid)
 	}
 	
@@ -917,6 +935,7 @@ async function fSendFileProgress(attribute){
 		
 		//change background colour
 		document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
+		document.querySelector('.file.file-'+fileid).dataset.complete = complete
 	}
 }
 
@@ -1088,7 +1107,7 @@ function fAddExplorerFile(peer,file,fileid,time,send,complete){
 		background = 'background:#bec4cf;'
 	}
 	let item = `
-		<div class="file file-${fileid}" style="${background}">
+		<div class="file file-${fileid} connect-${peer.connectId}" data-complete="${complete}" style="${background}">
 			<div class="icon"><div style="width:50px;height:50px"><img src="${fileLogo}"></div></div>
 			<div class="loader"><div style="width:50px;height:50px"><div class="progress">${progress}</div></div></div>
 			<div class="body">
