@@ -3,7 +3,7 @@ import wifidropLogo from '/icon-512.png'
 import fileLogo from './file.svg'
 import { setupDrop } from './drop.js'
 import {KVStorage} from 'kv-storage'
-import {generateName,waitForElm,base32,base32hex,getSizeUnit} from './utils.js'
+import {generateName,waitForElm,base32,base32hex,getSizeUnit,webrtcgarbagecollector} from './utils.js'
 import webconnect from 'webconnect'
 import * as config from  './config.js'
 
@@ -1152,6 +1152,8 @@ if(window.location.href.indexOf("localhost") == -1){
 	  event.preventDefault();
 	});
 }
+
+webrtcgarbagecollector()
 
 
 document.getElementById("loader").style.display = "none"
