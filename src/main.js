@@ -350,7 +350,7 @@ function fGenerateAvatar(seed,color){
 }
 
 function fUpdateMe(){
-	const avatar = fGenerateAvatar(me.id,me.color)
+	const avatar = fGenerateAvatar(me.id,me.varian)
 	document.querySelector('.peer.me .device-name').innerHTML = `<span class="varian" style="background:#${me.varian};"></span>`+me.name
 	document.querySelector('.peer.me .device').innerHTML = `
 		<img class="device-avatar" src="${avatar}">
@@ -498,7 +498,7 @@ async function fAddNewPeer(connectId,data){
 	await dbBio.put(key,peer)
 	
 	//add to ui
-	const avatar = fGenerateAvatar(peer.id,peer.color)
+	const avatar = fGenerateAvatar(peer.id,peer.varian)
 	const el = `
 		<div class="peer peer-${connectId}">
 			<div class="device"><img class="device-avatar" src="${avatar}"></div>
@@ -683,7 +683,7 @@ function fAddSendToList(peer,filesid){
 	if(document.querySelector('.infonopeers') != null){
 		document.querySelector('.infonopeers').remove()
 	}
-	const avatar = fGenerateAvatar(peer.id,peer.color)
+	const avatar = fGenerateAvatar(peer.id,peer.varian)
 	const el = `
 		<div class="peer peer-${peer.connectId}" data-peer="${peer.connectId}">
 			<div class="device"><img class="device-avatar" src="${avatar}"></div>
