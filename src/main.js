@@ -276,8 +276,10 @@ void async function main() {
 	//console.log('ice',ice)
 	//console.log('me',me)
 	
+	const ip = await fetch('https://get.geojs.io/v1/ip/geo.json')
+	const json = await ip.json()	
 	const timezone = new Date().getTimezoneOffset()
-	const password = me.address+timezone
+	const password = me.address+timezone+json.latitude+json.longitude
 
 
 	connect = webconnect({
@@ -1220,10 +1222,10 @@ document.querySelector('.peers .peer.me').addEventListener("click",()=>{
 	showexplorer()
 })
 if(window.location.href.indexOf("localhost") == -1){
-	document.querySelector('body').addEventListener("contextmenu",(e)=>{
+	/*document.querySelector('body').addEventListener("contextmenu",(e)=>{
 		e.preventDefault()
 		showexplorer()
-	})
+	})*/
 }
 
 document.querySelector('.explorer .popup .title .options').addEventListener("click",()=>{
