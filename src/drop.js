@@ -1,11 +1,15 @@
-export function setupDrop(element,callback) {
+export function setupDrop(element,largesupport,callback) {
   let counter = 0
   const setCounter = (count) => {
     counter = count
     element.innerHTML = `Drop count is ${counter}`
   }
   element.addEventListener('click', () => {
-	  fOpenFilePicker(callback)
+	  if(largesupport){
+		  fOpenFilePicker(callback)
+	  }else{
+		  fOpenFilePickerOld(callback)
+	  }
   })
 
 	let dropbox;

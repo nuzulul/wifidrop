@@ -22,6 +22,15 @@ let sendstream = new Map()
 let receivestream = new Map()
 let isbusy = new Map()
 let writableStream = new Map()
+let largesupport = false
+const largelimit = 104857600 //100MB
+
+//detect feature
+if(typeof showOpenFilePicker === typeof Function && typeof showSaveFilePicker === typeof Function){
+	largesupport = true
+}
+
+largesupport = false
 
 document.querySelector('#app').innerHTML = `
   <span id="loader" style="display:block;"><div class="loading">Loading&#8230;</div></span>
@@ -75,7 +84,7 @@ const dropCallback = (data)=>{
 	},500)
 }
 
-setupDrop(document.querySelector('#drop'),dropCallback)
+setupDrop(document.querySelector('#drop'),largesupport,dropCallback)
 
 
 void async function main() {
@@ -640,7 +649,7 @@ async function fOpenPeers(filesid){
 	const length = datafiles.length
 	let size = 0
 	for(const fileraw of datafiles){
-		const file = await fileraw.getFile()
+		const file = largesupport ? await fileraw.getFile() : fileraw
 		size += file.size
 	}
 	
@@ -710,14 +719,12 @@ async function fOfferFile(peer,filesid){
 	
 	const length = datafiles.length
 	let large = false
-	//const limit = 104857600 //100MB
-	const limit = 1
 	let size = 0
 	for(const fileraw of datafiles){
-		const file = await fileraw.getFile()
+		const file = largesupport ? await fileraw.getFile() : fileraw
 		size += file.size
 	}
-	if(size > limit){
+	if(size > largelimit){
 		large = true
 	}
 	
@@ -731,10 +738,30 @@ async function fOfferFile(peer,filesid){
 	document.querySelector('.offer.offer-'+filesid+' #parax').addEventListener("click",()=>{
 		para.remove(); 
 	})
+	
+	if(!largesupport && large){
+		
+		const msg = `Your device doesn't support large transfer (${getSizeUnit(fSafe(largelimit))})`
+		
+		const check = `
+			<span class="check" style="padding:10px 10px;color:red;">
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-x-fill" viewBox="0 0 16 16">
+				  <path d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2M6.854 6.146 8 7.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 8l1.147 1.146a.5.5 0 0 1-.708.708L8 8.707 6.854 9.854a.5.5 0 0 1-.708-.708L7.293 8 6.146 6.854a.5.5 0 1 1 .708-.708"/>
+				</svg>
+				<span class="msg">${msg}</span>
+			</span>`
+		const el = '.offer .message .content'
+		document.querySelector(el).insertAdjacentHTML("afterend",check)
+		setTimeout(()=>{
+			document.querySelector('.offer.offer-'+data.filesid).remove()
+			if(document.querySelector(el+' .check'))document.querySelector(el+' .check').remove()
+		},3000)
+		return;
+	}
 
 	let namefiles = []
 	for(const fileraw of datafiles){
-		const file = await fileraw.getFile()
+		const file = largesupport ? await fileraw.getFile() : fileraw
 		const name = file.name
 		const size = file.size
 		const type = file.type
@@ -753,6 +780,13 @@ async function fAnswerFile(connectId,data){
 	if(peers.has(connectId)){
 		
 		const peer = peers.get(connectId)
+		
+		if(!largesupport && data.size > largelimit){
+			const filesid = data.filesid
+			const answer = {command:'answer',data:{value:false,filesid,largelimit:true}}
+			fSendData(answer,connectId)
+			return
+		}
 		
 		const skipconfirmation = await dbMe.get('skipconfirmation')
 		
@@ -851,12 +885,16 @@ function fAcceptAnswer(connectId,data){
 
 function fDeclineAnswer(connectId,data){
 	if(document.querySelector('.offer.offer-'+data.filesid)){
+		let msg = "Decline"
+		if(data.largelimit){
+			msg = `Destination device doesn't support large transfer (${getSizeUnit(fSafe(largelimit))})`
+		}
 		const check = `
-			<span class="check">
+			<span class="check" style="padding:10px 10px;color:red;">
 				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-x-fill" viewBox="0 0 16 16">
 				  <path d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2M6.854 6.146 8 7.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 8l1.147 1.146a.5.5 0 0 1-.708.708L8 8.707 6.854 9.854a.5.5 0 0 1-.708-.708L7.293 8 6.146 6.854a.5.5 0 1 1 .708-.708"/>
 				</svg>
-				Decline
+				<span class="msg">${msg}</span>
 			</span>`
 		const el = '.offer .message .content'
 		document.querySelector(el).insertAdjacentHTML("afterend",check)
@@ -881,7 +919,7 @@ async function fSendFile(connectId,data){
 	let datafiles = files.get(filesid)
 		
 	for(const fileraw of datafiles){
-		const file = await fileraw.getFile()
+		const file = largesupport ? await fileraw.getFile() : fileraw
 		const name = file.name
 		const fileid = namefiles.find((item)=>item.name == name).fileid
 		const nonceid = nonce.shift()
