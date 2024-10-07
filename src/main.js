@@ -275,12 +275,16 @@ void async function main() {
 
 	//console.log('ice',ice)
 	//console.log('me',me)
+	
+	const timezone = new Date().getTimezoneOffset()
+	const password = me.address+timezone
 
 
 	connect = webconnect({
 		appName:"WIFIDrop",
 		channelName:"WIFIDropRoom",
-		connectPassword:me.address+me.priority,
+		//connectPassword:me.address+me.priority,
+		connectPassword:password,
 		iceConfiguration:{config:{iceServers:ice}}
 	})
 	connect.getMyId((attribute) => {
