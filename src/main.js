@@ -18,6 +18,10 @@ let dbMe
 let dbBio
 let dbHistory
 let connect
+let sendstream = new Map()
+let receivestream = new Map()
+let isbusy = new Map()
+let writableStream = new Map()
 
 document.querySelector('#app').innerHTML = `
   <span id="loader" style="display:block;"><div class="loading">Loading&#8230;</div></span>
@@ -400,11 +404,26 @@ async function fSendData(json,connectId){
 	const sign = Array.from(new Uint8Array(signature))
 	json.sign = sign
 	
-	connect.Send(JSON.stringify(json),{connectId})
+	let encodeddata = enc.encode(JSON.stringify(json))	
+	
+	connect.Send(encodeddata,{connectId})
 }
 
 async function fParseData(data,attribute){
+	//console.log('data1',data,attribute)
+	//console.log('type',typeof data)
+	
+	if (typeof data === 'object'){
+		const dec = new TextDecoder()
+		data = dec.decode(data)
+	}
+	//console.log('data2',data,attribute)
+	
+	//if (typeof data !== 'string') return
 	const json = JSON.parse(data)
+	
+	//const json = data
+	
 	const jwkpublicKey = json.data.jwkpublicKey
 	const publicKey = await importPublicKey(jwkpublicKey)
 	const signature = new Uint8Array(json.sign).buffer
@@ -450,6 +469,9 @@ async function fParseData(data,attribute){
 		if(document.querySelector('.clipboard.clipboard-'+connectId)){
 			document.querySelector('.clipboard .message .content #clipboard').value = clip
 		}
+	}
+	else if(json.command == 'state'){
+		fStateFile(attribute.connectId,json.data)
 	}
 }
 
@@ -611,13 +633,14 @@ function fStopAction(connectId){
 	}
 }
 
-function fOpenPeers(filesid){
+async function fOpenPeers(filesid){
 	
 	let datafiles = files.get(filesid)
 	
 	const length = datafiles.length
 	let size = 0
-	for(const file of datafiles){
+	for(const fileraw of datafiles){
+		const file = await fileraw.getFile()
 		size += file.size
 	}
 	
@@ -681,14 +704,21 @@ function fAddSendToList(peer,filesid){
 
 }
 
-function fOfferFile(peer,filesid){
+async function fOfferFile(peer,filesid){
 
 	let datafiles = files.get(filesid)
 	
 	const length = datafiles.length
+	let large = false
+	//const limit = 104857600 //100MB
+	const limit = 1
 	let size = 0
-	for(const file of datafiles){
+	for(const fileraw of datafiles){
+		const file = await fileraw.getFile()
 		size += file.size
+	}
+	if(size > limit){
+		large = true
 	}
 	
 	document.querySelector('.sendto').remove()
@@ -703,15 +733,18 @@ function fOfferFile(peer,filesid){
 	})
 
 	let namefiles = []
-	for(const file of datafiles){
+	for(const fileraw of datafiles){
+		const file = await fileraw.getFile()
 		const name = file.name
 		const size = file.size
 		const type = file.type
-		const item = {name,size,type}
+		const time = (new Date()).getTime()
+		const fileid = file.size.toString()+time.toString()+ Math.floor(Math.random() * 1000000)
+		const item = {name,size,type,fileid}
 		namefiles.push(item)
 	}
 	
-	const offer = {command:'offer',data:{length,size,filesid,namefiles}}
+	const offer = {command:'offer',data:{length,size,filesid,namefiles,large}}
 	 fSendData(offer,peer.connectId)
 
 }
@@ -772,7 +805,7 @@ async function fAnswerFile(connectId,data){
 	}
 }
 
-function fSendAccept(data,connectId){
+async function fSendAccept(data,connectId){
 	
 	let nonce = []
 	
@@ -785,8 +818,28 @@ function fSendAccept(data,connectId){
 	}
 	
 	const filesid = data.filesid
-	const answer = {command:'answer',data:{value:true,filesid,nonce}}
+	const namefiles = data.namefiles
+	const large = data.large
+
+	if(large){
+		for(const namefile of namefiles){
+			const fileid = namefile.fileid
+			receivestream.set(fileid,0)
+			  let draftHandle = await showSaveFilePicker({suggestedName: namefile.name});
+			  try {
+					const writableStreamRaw = await draftHandle.createWritable();
+					writableStream.set(fileid,writableStreamRaw)
+			  }
+			  catch (error) { // if user rejects
+					console.error(error)
+					return
+			  }
+		}
+	}
+
+	const answer = {command:'answer',data:{value:true,filesid,namefiles,large,nonce}}
 	fSendData(answer,connectId)
+
 }
 
 function fAcceptAnswer(connectId,data){
@@ -817,30 +870,78 @@ function fDeclineAnswer(connectId,data){
 async function fSendFile(connectId,data){
 	showexplorer()
 	const filesid = data.filesid
+	const large = data.large
 	const nonce = data.nonce
+	const namefiles = data.namefiles
 	const peer = peers.get(connectId)
 	const publicKey = JSON.stringify(peer.jwkpublicKey)
 	const key = base32hex.encode(publicKey)
 	const send = true
 	const complete = 'start'
 	let datafiles = files.get(filesid)
-	for(const file of datafiles){
-		const time = (new Date()).getTime()
-		const fileid = file.size.toString()+time.toString()+ Math.floor(Math.random() * 1000000)
+		
+	for(const fileraw of datafiles){
+		const file = await fileraw.getFile()
+		const name = file.name
+		const fileid = namefiles.find((item)=>item.name == name).fileid
 		const nonceid = nonce.shift()
+		const time = (new Date()).getTime()
 		
-		setTimeout(()=>{
+		setTimeout(async ()=>{
 			fAddExplorerFile(peer,file,fileid,time,send,complete)
-			let reader = new FileReader();
-			reader.onload = function() {
-				let arrayBuffer = this.result
-				const attribute = {connectId,metadata:{fileid,name:file.name, type: file.type,size:file.size,nonceid}}
-				connect.Send(arrayBuffer,attribute)
+			
+			if(!large){
+				let reader = new FileReader();
+				reader.onload = function() {
+					let arrayBuffer = this.result
+					const attribute = {connectId,metadata:{fileid,name:file.name, type: file.type,size:file.size,nonceid,large}}
+					connect.Send(arrayBuffer,attribute)
+				}
+				reader.readAsArrayBuffer(file);	
 			}
-			reader.readAsArrayBuffer(file);	
+			
+			if(large){
+				sendstream.set(fileid,0)
+				isbusy.set(fileid,false)
+				let filestream = file.stream()
+				filestream.pipeTo(new WritableStream({
+					async write(chunk, controller) {
+						return new Promise((resolve, reject) => {
+							// now we get chunk (s)
+							//console.log('chunk',chunk.byteLength)
+							const chuncksize = chunk.byteLength
+							const attribute = {connectId,metadata:{fileid,name:file.name, type: file.type,size:file.size,nonceid,large,chuncksize}}
+							connect.Send(chunk,attribute)
+							let interval = setInterval(()=>{
+								if(!isbusy.get(fileid)){
+									isbusy.set(fileid,true)
+									clearInterval(interval)
+									resolve()
+								}
+							},10)
+						})
+					},
+					close() {
+						//const state = {command:'state',data:{fileid,state:'finished'}}
+						//fSendData(state,connectId)
+					}
+				})
+				)
+			}
+			
 		},500)
-		
+	}
 	
+}
+
+async function fStateFile(connectId,data){
+	const fileid = data.fileid
+	const state = data.state
+	if(state === 'finished'){
+		await writableStream.close()
+	}
+	else if (state === 'next'){
+		isbusy.set(fileid,false)
 	}
 }
 
@@ -855,6 +956,7 @@ async function fReceiveFileProgress(attribute){
 	const name = metadata.name
 	const size = metadata.size
 	const type = metadata.type
+	const large = metadata.large
 	const nonceid = metadata.nonceid
 	if(!nonces.has(nonceid))return
 	const noncedata = nonces.get(nonceid)
@@ -862,47 +964,104 @@ async function fReceiveFileProgress(attribute){
 	const send = false
 	const complete = Math.floor(percent*100)
 	const file = {name,size}
-	if(!document.querySelector('.file.file-'+fileid)){
-		if(connectId != noncedata.connectId || name != noncedata.name || size != noncedata.size || type != noncedata.type)return
-		showexplorer()
-		fAddExplorerFile(peer,file,fileid,time,send,complete)
-	}else{
-		document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
+	
+	if(!large){
+		if(!document.querySelector('.file.file-'+fileid)){
+			if(connectId != noncedata.connectId || name != noncedata.name || size != noncedata.size || type != noncedata.type)return
+			showexplorer()
+			fAddExplorerFile(peer,file,fileid,time,send,complete)
+		}else{
+			document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
+		}
+		
+		if(percent == 1){
+			//save to dbHistory
+			const item = {author:key,fileid,time,name,size,send,complete}
+			await dbHistory.put(fileid,item)
+			//change background colour
+			document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
+			document.querySelector('.file.file-'+fileid).dataset.complete = complete
+			fDeleteNonce(nonceid)
+		}
 	}
 	
-	if(percent == 1){
-		//save to dbHistory
-		const item = {author:key,fileid,time,name,size,send,complete}
-		await dbHistory.put(fileid,item)
-		//change background colour
-		document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
-		document.querySelector('.file.file-'+fileid).dataset.complete = complete
-		fDeleteNonce(nonceid)
+	if(large){
+		
+		if(percent < 0.1){
+			if(!document.querySelector('.file.file-'+fileid)){
+				if(connectId != noncedata.connectId || name != noncedata.name || size != noncedata.size || type != noncedata.type)return
+				showexplorer()
+				fAddExplorerFile(peer,file,fileid,time,send,complete)
+			}
+		}
+
+		const chuncksize = metadata.chuncksize
+		if(percent == 1){
+			let currentsize = receivestream.get(fileid)+chuncksize
+			receivestream.set(fileid,currentsize)
+			const currentcomplete = (currentsize/size)*100
+			const complete = Math.floor(currentcomplete)
+			
+			if(!document.querySelector('.file.file-'+fileid)){
+				if(connectId != noncedata.connectId || name != noncedata.name || size != noncedata.size || type != noncedata.type)return
+				showexplorer()
+				fAddExplorerFile(peer,file,fileid,time,send,complete)
+			}else{
+				document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
+			}			
+			
+			if(currentcomplete == 100){
+				//save to dbHistory
+				const item = {author:key,fileid,time,name,size,send,complete}
+				await dbHistory.put(fileid,item)
+				//change background colour
+				document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
+				document.querySelector('.file.file-'+fileid).dataset.complete = complete
+				fDeleteNonce(nonceid)
+				const writableStreamRaw = writableStream.get(fileid)
+				await writableStreamRaw.close()
+			}
+		}
 	}
 	
 }
 
-function fReceiveData(data,attribute){
+async function fReceiveData(data,attribute){
+	//console.log('chunk',data.byteLength)
 	const connectId = attribute.connectId
 	const metadata = attribute.metadata
 	const name = metadata.name
 	const size = metadata.size
 	const type = metadata.type
+	const large = metadata.large
+	const fileid = metadata.fileid
 	const nonceid = metadata.nonceid
 	if(!nonces.has(nonceid))return
 	const noncedata = nonces.get(nonceid)
 	if(connectId != noncedata.connectId || name != noncedata.name || size != noncedata.size || type != noncedata.type)return
 	
-	  let blob1 = new Blob([new Uint8Array(data)],{type:attribute.metadata.type})
+	if(!large){
+		  let blob1 = new Blob([new Uint8Array(data)],{type:attribute.metadata.type})
 
-      const aElement = document.createElement('a');
-      aElement.setAttribute('download', attribute.metadata.name);
-      const href = URL.createObjectURL(blob1);
-      aElement.setAttribute('href', href);
-      aElement.setAttribute('target', '_blank');
-      aElement.click();
-      URL.revokeObjectURL(href);
-	  fDeleteNonce(nonceid)
+		  const aElement = document.createElement('a');
+		  aElement.setAttribute('download', attribute.metadata.name);
+		  const href = URL.createObjectURL(blob1);
+		  aElement.setAttribute('href', href);
+		  aElement.setAttribute('target', '_blank');
+		  aElement.click();
+		  URL.revokeObjectURL(href);
+		  fDeleteNonce(nonceid)
+	}
+	
+	if(large){
+		if (data.byteLength || data.size){
+			const writableStreamRaw = writableStream.get(fileid)
+			await writableStreamRaw.write(data)
+			const state = {command:'state',data:{fileid,state:'next'}}
+			fSendData(state,connectId)
+		}
+	}
+	
 }
 
 function fDeleteNonce(nonceid){
@@ -922,21 +1081,45 @@ async function fSendFileProgress(attribute){
 	const fileid = metadata.fileid
 	const name = metadata.name
 	const size = metadata.size
+	const large = metadata.large
 	const time = (new Date()).getTime()
 	const percent = attribute.percent 
 	const complete = Math.floor(percent*100)
 	const send = true
-	document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
-
-	if(percent == 1){
-		//save to dbHistory
-		const item = {author:key,fileid,time,name,size,send,complete}
-		await dbHistory.put(fileid,item)
-		
-		//change background colour
-		document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
-		document.querySelector('.file.file-'+fileid).dataset.complete = complete
+	
+	if(!large){
+		document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
+		if(percent == 1){
+			//save to dbHistory
+			const item = {author:key,fileid,time,name,size,send,complete}
+			await dbHistory.put(fileid,item)
+			
+			//change background colour
+			document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
+			document.querySelector('.file.file-'+fileid).dataset.complete = complete
+		}
 	}
+	
+	if(large){
+		const chuncksize = metadata.chuncksize
+		if(percent == 1){
+			let currentsize = sendstream.get(fileid)+chuncksize
+			sendstream.set(fileid,currentsize)
+			const currentcomplete = (currentsize/size)*100
+			const complete = Math.floor(currentcomplete)
+			document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
+			if(currentcomplete == 100){
+				//save to dbHistory
+				const item = {author:key,fileid,time,name,size,send,complete}
+				await dbHistory.put(fileid,item)
+				
+				//change background colour
+				document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
+				document.querySelector('.file.file-'+fileid).dataset.complete = complete
+			}
+		}
+	}
+	
 }
 
 //HISTORY files
@@ -1092,6 +1275,7 @@ function showexplorer(){
 }
 
 function fAddExplorerFile(peer,file,fileid,time,send,complete){
+	
 	const unit = getSizeUnit(file.size)
 	const note = send ? 'You sent to ':'Sent by '
 	let progress = '0%'
