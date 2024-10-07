@@ -30,7 +30,7 @@ if(typeof showOpenFilePicker === typeof Function && typeof showSaveFilePicker ==
 	largesupport = true
 }
 
-largesupport = false
+//largesupport = false
 
 document.querySelector('#app').innerHTML = `
   <span id="loader" style="display:block;"><div class="loading">Loading&#8230;</div></span>
@@ -728,7 +728,7 @@ async function fOfferFile(peer,filesid){
 		large = true
 	}
 	
-	document.querySelector('.sendto').remove()
+	if(document.querySelector('.sendto'))document.querySelector('.sendto').remove()
 	
 	const para = document.createElement("div");
 	para.innerHTML = `<div class="dialog offer offer-${filesid}"><div id="parax" style="display:block;"><span style="font-size:30px;color:#fff;">X</span></div><div class="message"><div class="title"><div style="padding:10px 10px;">Waiting confirmation</div></div><div class="content" >You want to send  ${fSafe(length)} file(s) of ${getSizeUnit(fSafe(size))} to ${fSafe(peer.name)} ...</div></div></div>`;
@@ -739,22 +739,32 @@ async function fOfferFile(peer,filesid){
 		para.remove(); 
 	})
 	
-	if(!largesupport && large){
+	if(!largesupport && large && peer.force == undefined){
 		
-		const msg = `Your device doesn't support large transfer (${getSizeUnit(fSafe(largelimit))})`
+		const msg = `Your device appear doesn't support large transfer (${getSizeUnit(fSafe(largelimit))})`
 		
 		const check = `
-			<span class="check" style="padding:10px 10px;color:red;">
+			<span class="check" style="padding:10px 10px;color:red;display:inline-block">
 				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-x-fill" viewBox="0 0 16 16">
 				  <path d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2M6.854 6.146 8 7.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 8l1.147 1.146a.5.5 0 0 1-.708.708L8 8.707 6.854 9.854a.5.5 0 0 1-.708-.708L7.293 8 6.146 6.854a.5.5 0 1 1 .708-.708"/>
 				</svg>
 				<span class="msg">${msg}</span>
+				<div class="footer" style="display:none">
+					<p>Caution ! Experimental FORCE large transfer!</p>
+					<button class="force" >FORCE</button>
+				</div>
 			</span>`
 		const el = '.offer .message .content'
-		document.querySelector(el).insertAdjacentHTML("afterend",check)
+		document.querySelector(el).insertAdjacentHTML("beforeend",check)
+		document.querySelector(el+' .check .footer .force').addEventListener("click",()=>{
+			peer.force = true
+			if(document.querySelector('.offer.offer-'+filesid)){
+				document.querySelector('.offer.offer-'+filesid).remove()
+			}
+			fOfferFile(peer,filesid)
+		})
 		setTimeout(()=>{
-			document.querySelector('.offer.offer-'+data.filesid).remove()
-			if(document.querySelector(el+' .check'))document.querySelector(el+' .check').remove()
+			document.querySelector(el+' .check .footer').style.display = 'block'
 		},3000)
 		return;
 	}
@@ -771,7 +781,8 @@ async function fOfferFile(peer,filesid){
 		namefiles.push(item)
 	}
 	
-	const offer = {command:'offer',data:{length,size,filesid,namefiles,large}}
+	const force = peer.force ? true : false
+	const offer = {command:'offer',data:{length,size,filesid,namefiles,large,force}}
 	 fSendData(offer,peer.connectId)
 
 }
@@ -781,7 +792,7 @@ async function fAnswerFile(connectId,data){
 		
 		const peer = peers.get(connectId)
 		
-		if(!largesupport && data.size > largelimit){
+		if(!largesupport && data.size > largelimit && !data.force){
 			const filesid = data.filesid
 			const answer = {command:'answer',data:{value:false,filesid,largelimit:true}}
 			fSendData(answer,connectId)
@@ -884,23 +895,39 @@ function fAcceptAnswer(connectId,data){
 }
 
 function fDeclineAnswer(connectId,data){
+	const filesid = data.filesid
 	if(document.querySelector('.offer.offer-'+data.filesid)){
-		let msg = "Decline"
+		let msg = "Destination device decline"
 		if(data.largelimit){
 			msg = `Destination device doesn't support large transfer (${getSizeUnit(fSafe(largelimit))})`
 		}
 		const check = `
-			<span class="check" style="padding:10px 10px;color:red;">
+			<span class="check" style="padding:10px 10px;color:red;display:inline-block">
 				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-x-fill" viewBox="0 0 16 16">
 				  <path d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2M6.854 6.146 8 7.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 8l1.147 1.146a.5.5 0 0 1-.708.708L8 8.707 6.854 9.854a.5.5 0 0 1-.708-.708L7.293 8 6.146 6.854a.5.5 0 1 1 .708-.708"/>
 				</svg>
 				<span class="msg">${msg}</span>
+				<div class="footer" style="display:none">
+					<p>Caution ! Experimental FORCE large transfer!</p>
+					<button class="force" >FORCE</button>
+				</div>
 			</span>`
 		const el = '.offer .message .content'
-		document.querySelector(el).insertAdjacentHTML("afterend",check)
+		document.querySelector(el).insertAdjacentHTML("beforeend",check)
+		document.querySelector(el+' .check .footer .force').addEventListener("click",()=>{
+			let peer = peers.get(connectId)
+			peer.force = true
+			if(document.querySelector('.offer.offer-'+filesid)){
+				document.querySelector('.offer.offer-'+filesid).remove()
+			}
+			fOfferFile(peer,filesid)
+		})
 		setTimeout(()=>{
-			document.querySelector('.offer.offer-'+data.filesid).remove()
-			if(document.querySelector(el+' .check'))document.querySelector(el+' .check').remove()
+			document.querySelector(el+' .check .footer').style.display = 'block'
+			if(!data.largelimit){
+				document.querySelector('.offer.offer-'+data.filesid).remove()
+				if(document.querySelector(el+' .check'))document.querySelector(el+' .check').remove()
+			}
 		},3000)
 	}
 }
