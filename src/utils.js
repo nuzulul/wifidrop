@@ -218,3 +218,8 @@ export function webrtcgarbagecollector(){
 
 	setInterval(peer, 20);
 }
+
+export function generatekey(data){
+	const result = base32.encode(data).replace(/[^a-z0-9_]/gi,'')
+	return result
+}

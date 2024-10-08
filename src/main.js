@@ -3,7 +3,7 @@ import wifidropLogo from '/icon-512.png'
 import fileLogo from './file.svg'
 import { setupDrop } from './drop.js'
 import {KVStorage} from 'kv-storage'
-import {generateName,waitForElm,base32,base32hex,getSizeUnit,webrtcgarbagecollector} from './utils.js'
+import {generateName,waitForElm,base32,base32hex,getSizeUnit,webrtcgarbagecollector,generatekey} from './utils.js'
 import webconnect from 'webconnect'
 import * as config from  './config.js'
 //import {promptSave} from './streamSave.js/streamSave.js'
@@ -133,7 +133,7 @@ void async function main() {
 		me.color = randomColor
 		const skipconfirmation = false
 		await dbMe.put('skipconfirmation',skipconfirmation)
-		const key = base32hex.encode(strpublicKey)
+		const key = generatekey(strpublicKey)
 		me.key = key
 	}else{
 		const strpublicKey = await dbMe.get('publicKey')
@@ -149,7 +149,7 @@ void async function main() {
 		me.id = id
 		const color = await dbMe.get('color')
 		me.color = color
-		const key = base32hex.encode(strpublicKey)
+		const key = generatekey(strpublicKey)
 		me.key = key
 	}
 
@@ -439,7 +439,7 @@ async function fParseData(data,attribute){
 	const json = JSON.parse(data)
 	
 	//const json = data
-	
+	//console.log('json',json)
 	const jwkpublicKey = json.data.jwkpublicKey
 	const publicKey = await importPublicKey(jwkpublicKey)
 	const signature = new Uint8Array(json.sign).buffer
@@ -501,7 +501,7 @@ async function fAddNewPeer(connectId,data){
 	peers.set(connectId,peer)
 	
 	//add to idb dbBio
-	const key = base32hex.encode(publicKey)
+	const key = generatekey(publicKey)
 	await dbBio.put(key,peer)
 	
 	//add to ui
@@ -772,7 +772,7 @@ async function fOfferFile(peer,filesid,isforce){
 		})
 		setTimeout(()=>{
 			document.querySelector(el+' .check .footer').style.display = 'block'
-		},3000)
+		},2000)
 		return;
 	}
 
@@ -971,7 +971,7 @@ function fDeclineAnswer(connectId,data){
 				document.querySelector('.offer.offer-'+data.filesid).remove()
 				if(document.querySelector(el+' .check'))document.querySelector(el+' .check').remove()
 			}
-		},3000)
+		},2000)
 	}
 }
 
@@ -984,7 +984,7 @@ async function fSendFile(connectId,data){
 	const namefiles = data.namefiles
 	const peer = peers.get(connectId)
 	const publicKey = JSON.stringify(peer.jwkpublicKey)
-	const key = base32hex.encode(publicKey)
+	const key = generatekey(publicKey)
 	const send = true
 	const complete = 'start'
 	let datafiles = files.get(filesid)
@@ -1093,7 +1093,7 @@ async function fReceiveFileProgress(attribute){
 	const connectId = attribute.connectId
 	const peer = peers.get(connectId)
 	const publicKey = JSON.stringify(peer.jwkpublicKey)
-	const key = base32hex.encode(publicKey)
+	const key = generatekey(publicKey)
 	const percent = attribute.percent
 	const metadata = attribute.metadata
 	const fileid = metadata.fileid
@@ -1270,7 +1270,7 @@ async function fSendFileProgress(attribute){
 	const connectId = attribute.connectId
 	const peer = peers.get(connectId)
 	const publicKey = JSON.stringify(peer.jwkpublicKey)
-	const key = base32hex.encode(publicKey)
+	const key = generatekey(publicKey)
 	const metadata = attribute.metadata
 	const fileid = metadata.fileid
 	const name = metadata.name
