@@ -1,3 +1,6 @@
+//! Copyright Nuzulul Zulkarnain. Released under The MIT License.
+//! WIFIDrop -- https://github.com/nuzulul/wifidrop
+
 import './style.css'
 import wifidropLogo from '/icon-512.png'
 import fileLogo from './file.svg'
@@ -6,7 +9,6 @@ import {KVStorage} from 'kv-storage'
 import {generateName,waitForElm,base32,base32hex,getSizeUnit,webrtcgarbagecollector,generatekey} from './utils.js'
 import webconnect from 'webconnect'
 import * as config from  './config.js'
-//import {promptSave} from './streamSave.js/streamSave.js'
 
 let me = {}
 let peers = new Map()
@@ -72,7 +74,11 @@ document.querySelector('#app').innerHTML = `
 			</div>
 		</div>	
 	</div>
-	<div class="attribution">WIFIDrop &copy; 2024 - Instant WIFI Drop P2P Large File Transfer</div>
+	<div class="attribution">
+		<p>WIFIDrop &copy; 2024 - Instant WIFI Drop P2P Large File Transfer</p>
+		<p><a href="https://github.com/nuzulul/wifidrop">Open Source by Nuzulul Zulkarnain</a></p>
+		
+	</div>
   </div>
 `
 
