@@ -6,6 +6,7 @@ import {KVStorage} from 'kv-storage'
 import {generateName,waitForElm,base32,base32hex,getSizeUnit,webrtcgarbagecollector} from './utils.js'
 import webconnect from 'webconnect'
 import * as config from  './config.js'
+//import {promptSave} from './streamSave.js/streamSave.js'
 
 let me = {}
 let peers = new Map()
@@ -24,7 +25,7 @@ let isbusy = new Map()
 let writableStream = new Map()
 let largesupport = false
 const largelimit = 104857600 //100MB
-
+//const largelimit = 1024 * 1024 //1MB
 //detect feature
 if(typeof showOpenFilePicker === typeof Function && typeof showSaveFilePicker === typeof Function){
 	largesupport = true
@@ -719,7 +720,7 @@ function fAddSendToList(peer,filesid){
 
 }
 
-async function fOfferFile(peer,filesid){
+async function fOfferFile(peer,filesid,isforce){
 
 	let datafiles = files.get(filesid)
 	
@@ -745,9 +746,9 @@ async function fOfferFile(peer,filesid){
 		para.remove(); 
 	})
 	
-	if(!largesupport && large && peer.force == undefined){
+	if(!largesupport && large && isforce == undefined){
 		
-		const msg = `Your device appear doesn't support large transfer (${getSizeUnit(fSafe(largelimit))})`
+		const msg = `Your device doesn't support large transfer (${getSizeUnit(fSafe(largelimit))})`
 		
 		const check = `
 			<span class="check" style="padding:10px 10px;color:red;display:inline-block">
@@ -756,18 +757,18 @@ async function fOfferFile(peer,filesid){
 				</svg>
 				<span class="msg">${msg}</span>
 				<div class="footer" style="display:none">
-					<p>Caution ! Experimental FORCE large transfer!</p>
-					<button class="force" >FORCE</button>
+					<p>Caution ! Legacy FORCE large transfer!</p>
+					<button class="force" >TRY FORCE TRANSFER</button>
 				</div>
 			</span>`
 		const el = '.offer .message .content'
 		document.querySelector(el).insertAdjacentHTML("beforeend",check)
 		document.querySelector(el+' .check .footer .force').addEventListener("click",()=>{
-			peer.force = true
+			isforce = true
 			if(document.querySelector('.offer.offer-'+filesid)){
 				document.querySelector('.offer.offer-'+filesid).remove()
 			}
-			fOfferFile(peer,filesid)
+			fOfferFile(peer,filesid,isforce)
 		})
 		setTimeout(()=>{
 			document.querySelector(el+' .check .footer').style.display = 'block'
@@ -787,7 +788,7 @@ async function fOfferFile(peer,filesid){
 		namefiles.push(item)
 	}
 	
-	const force = peer.force ? true : false
+	const force = isforce ? true : false
 	const offer = {command:'offer',data:{length,size,filesid,namefiles,large,force}}
 	 fSendData(offer,peer.connectId)
 
@@ -798,7 +799,10 @@ async function fAnswerFile(connectId,data){
 		
 		const peer = peers.get(connectId)
 		
-		if(!largesupport && data.size > largelimit && !data.force){
+		const isforce = data.force
+		const force = isforce ? true : false
+		
+		if(!largesupport && data.size > largelimit && !force){
 			const filesid = data.filesid
 			const answer = {command:'answer',data:{value:false,filesid,largelimit:true}}
 			fSendData(answer,connectId)
@@ -871,8 +875,9 @@ async function fSendAccept(data,connectId){
 	const filesid = data.filesid
 	const namefiles = data.namefiles
 	const large = data.large
+	const force = data.force
 
-	if(large){
+	if(large && !force){
 		for(const namefile of namefiles){
 			const fileid = namefile.fileid
 			receivestream.set(fileid,0)
@@ -887,8 +892,40 @@ async function fSendAccept(data,connectId){
 			  }
 		}
 	}
+	
+	if(large && force){
+		for(const namefile of namefiles){
+			const fileid = namefile.fileid
+			const name = namefile.name
+			const size = namefile.size
+			receivestream.set(fileid,0)
+			
+			await new Promise(async (resolve)=>{
+				const [url, writer] = await promptSave(name, size);
+				writableStream.set(fileid,writer)
+				setTimeout(()=>{
+					resolve()
+				},1000)
+			})
+			
+			/*const numChunks = 10;
+			const chunk = new Uint8Array(Array(20).fill(97)); // 97 (20 times) == "aaaaaaaaaaaaaaaaaaaa"
+			const headers = {"Content-Length": (numChunks * chunk.length).toString()};
 
-	const answer = {command:'answer',data:{value:true,filesid,namefiles,large,nonce}}
+			
+				const [url, writer] = await promptSave(name, (numChunks * chunk.length));
+				console.log(url,writer)
+				for (const i of [...Array(numChunks).keys()]) {
+					writer.write(chunk);
+					i === (numChunks - 1) ? writer.close() : await new Promise(rs => setTimeout(rs, 1000));
+				}
+				writer.close();
+			*/
+
+		}
+	}
+
+	const answer = {command:'answer',data:{value:true,filesid,namefiles,large,nonce,force}}
 	fSendData(answer,connectId)
 
 }
@@ -914,8 +951,8 @@ function fDeclineAnswer(connectId,data){
 				</svg>
 				<span class="msg">${msg}</span>
 				<div class="footer" style="display:none">
-					<p>Caution ! Experimental FORCE large transfer!</p>
-					<button class="force" >FORCE</button>
+					<p>Caution ! Legacy FORCE large transfer!</p>
+					<button class="force" >TRY FORCE TRANSFER</button>
 				</div>
 			</span>`
 		const el = '.offer .message .content'
@@ -926,7 +963,7 @@ function fDeclineAnswer(connectId,data){
 			if(document.querySelector('.offer.offer-'+filesid)){
 				document.querySelector('.offer.offer-'+filesid).remove()
 			}
-			fOfferFile(peer,filesid)
+			fOfferFile(peer,filesid,true)
 		})
 		setTimeout(()=>{
 			document.querySelector(el+' .check .footer').style.display = 'block'
@@ -943,6 +980,7 @@ async function fSendFile(connectId,data){
 	const filesid = data.filesid
 	const large = data.large
 	const nonce = data.nonce
+	const force = data.force
 	const namefiles = data.namefiles
 	const peer = peers.get(connectId)
 	const publicKey = JSON.stringify(peer.jwkpublicKey)
@@ -971,7 +1009,7 @@ async function fSendFile(connectId,data){
 				reader.readAsArrayBuffer(file);	
 			}
 			
-			if(large){
+			if(large && !force){
 				sendstream.set(fileid,0)
 				isbusy.set(fileid,false)
 				let filestream = file.stream()
@@ -998,6 +1036,41 @@ async function fSendFile(connectId,data){
 					}
 				})
 				)
+			}
+			
+			if(large && force){
+				sendstream.set(fileid,0)
+				isbusy.set(fileid,false)
+				  const chunkSize = 1 * 1024 * 1024; // 10 MB
+				  const totalChunks = Math.ceil(file.size / chunkSize);
+				  let startByte = 0;
+				  for (let i = 1; i <= totalChunks; i++) {
+					const endByte = Math.min(startByte + chunkSize, file.size);
+					const chunk = file.slice(startByte, endByte);
+					await new Promise((resolve, reject) => {
+							let fr = new FileReader()
+							fr.onload = function () {
+								isbusy.set(fileid,true)
+								
+								let arrayBuffer = this.result 
+								const chuncksize = arrayBuffer.byteLength
+								//console.log('chuncksize',chuncksize)
+								const attribute = {connectId,metadata:{fileid,name:file.name, type: file.type,size:file.size,nonceid,large,force,chuncksize,i}}
+								connect.Send(chunk,attribute)
+								
+								let interval = setInterval(()=>{
+									if(!isbusy.get(fileid)){
+										
+										clearInterval(interval)
+										resolve()
+									}
+								},10)
+							}
+							fr.readAsArrayBuffer(chunk)
+					})
+					startByte = endByte;
+				  }
+				  //console.log('Upload complete');
 			}
 			
 		},500)
@@ -1028,6 +1101,7 @@ async function fReceiveFileProgress(attribute){
 	const size = metadata.size
 	const type = metadata.type
 	const large = metadata.large
+	const force = metadata.force
 	const nonceid = metadata.nonceid
 	if(!nonces.has(nonceid))return
 	const noncedata = nonces.get(nonceid)
@@ -1056,7 +1130,7 @@ async function fReceiveFileProgress(attribute){
 		}
 	}
 	
-	if(large){
+	if(large && !force){
 		
 		if(percent < 0.1){
 			if(!document.querySelector('.file.file-'+fileid)){
@@ -1094,6 +1168,45 @@ async function fReceiveFileProgress(attribute){
 			}
 		}
 	}
+
+	if(large && force){
+		
+		if(percent < 0.1){
+			if(!document.querySelector('.file.file-'+fileid)){
+				if(connectId != noncedata.connectId || name != noncedata.name || size != noncedata.size || type != noncedata.type)return
+				showexplorer()
+				fAddExplorerFile(peer,file,fileid,time,send,complete)
+			}
+		}
+
+		const chuncksize = metadata.chuncksize
+		if(percent == 1){
+			let currentsize = receivestream.get(fileid)+chuncksize
+			receivestream.set(fileid,currentsize)
+			const currentcomplete = (currentsize/size)*100
+			const complete = Math.floor(currentcomplete)
+			
+			if(!document.querySelector('.file.file-'+fileid)){
+				if(connectId != noncedata.connectId || name != noncedata.name || size != noncedata.size || type != noncedata.type)return
+				showexplorer()
+				fAddExplorerFile(peer,file,fileid,time,send,complete)
+			}else{
+				document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
+			}			
+			
+			if(currentcomplete == 100){
+				//save to dbHistory
+				const item = {author:key,fileid,time,name,size,send,complete}
+				await dbHistory.put(fileid,item)
+				//change background colour
+				document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
+				document.querySelector('.file.file-'+fileid).dataset.complete = complete
+				fDeleteNonce(nonceid)
+				const writer = writableStream.get(fileid)
+				await writer.close()
+			}
+		}
+	}
 	
 }
 
@@ -1105,6 +1218,7 @@ async function fReceiveData(data,attribute){
 	const size = metadata.size
 	const type = metadata.type
 	const large = metadata.large
+	const force = metadata.force
 	const fileid = metadata.fileid
 	const nonceid = metadata.nonceid
 	if(!nonces.has(nonceid))return
@@ -1124,10 +1238,19 @@ async function fReceiveData(data,attribute){
 		  fDeleteNonce(nonceid)
 	}
 	
-	if(large){
+	if(large && !force){
 		if (data.byteLength || data.size){
 			const writableStreamRaw = writableStream.get(fileid)
 			await writableStreamRaw.write(data)
+			const state = {command:'state',data:{fileid,state:'next'}}
+			fSendData(state,connectId)
+		}
+	}
+
+	if(large && force){
+		if (data.byteLength || data.size){
+			const writer = writableStream.get(fileid)
+			await writer.write(data)
 			const state = {command:'state',data:{fileid,state:'next'}}
 			fSendData(state,connectId)
 		}
@@ -1153,6 +1276,7 @@ async function fSendFileProgress(attribute){
 	const name = metadata.name
 	const size = metadata.size
 	const large = metadata.large
+	const force = metadata.force
 	const time = (new Date()).getTime()
 	const percent = attribute.percent 
 	const complete = Math.floor(percent*100)
@@ -1171,7 +1295,27 @@ async function fSendFileProgress(attribute){
 		}
 	}
 	
-	if(large){
+	if(large && !force){
+		const chuncksize = metadata.chuncksize
+		if(percent == 1){
+			let currentsize = sendstream.get(fileid)+chuncksize
+			sendstream.set(fileid,currentsize)
+			const currentcomplete = (currentsize/size)*100
+			const complete = Math.floor(currentcomplete)
+			document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
+			if(currentcomplete == 100){
+				//save to dbHistory
+				const item = {author:key,fileid,time,name,size,send,complete}
+				await dbHistory.put(fileid,item)
+				
+				//change background colour
+				document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
+				document.querySelector('.file.file-'+fileid).dataset.complete = complete
+			}
+		}
+	}
+	
+	if(large && force){
 		const chuncksize = metadata.chuncksize
 		if(percent == 1){
 			let currentsize = sendstream.get(fileid)+chuncksize
