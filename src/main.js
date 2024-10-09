@@ -1347,8 +1347,8 @@ async function fReceiveData(data,attribute){
 		if (data.byteLength || data.size){
 			const writableStreamRaw = writableStream.get(fileid)
 			await writableStreamRaw.write(data)
-			const state = {command:'state',data:{fileid,state:'next'}}
-			fSendData(state,connectId)
+			//const state = {command:'state',data:{fileid,state:'next'}}
+			//fSendData(state,connectId)
 		}
 	}
 
@@ -1356,8 +1356,8 @@ async function fReceiveData(data,attribute){
 		if (data.byteLength || data.size){
 			const writer = writableStream.get(fileid)
 			await writer.write(data)
-			const state = {command:'state',data:{fileid,state:'next'}}
-			fSendData(state,connectId)
+			//const state = {command:'state',data:{fileid,state:'next'}}
+			//fSendData(state,connectId)
 		}
 	}
 	
@@ -1403,6 +1403,7 @@ async function fSendFileProgress(attribute){
 	if(large && !force){
 		const chuncksize = metadata.chuncksize
 		if(percent == 1){
+			isbusy.set(fileid,false)
 			let currentsize = sendstream.get(fileid)+chuncksize
 			sendstream.set(fileid,currentsize)
 			const currentcomplete = (currentsize/size)*100
@@ -1423,6 +1424,7 @@ async function fSendFileProgress(attribute){
 	if(large && force){
 		const chuncksize = metadata.chuncksize
 		if(percent == 1){
+			isbusy.set(fileid,false)
 			let currentsize = sendstream.get(fileid)+chuncksize
 			sendstream.set(fileid,currentsize)
 			const currentcomplete = (currentsize/size)*100
