@@ -22,6 +22,7 @@ let dbBio
 let dbHistory
 let connect
 let sendstream = new Map()
+let sendtime = new Map()
 let receivestream = new Map()
 let isbusy = new Map()
 let writableStream = new Map()
@@ -1116,6 +1117,7 @@ async function fSendFile(connectId,data){
 			
 			if(large && !force){
 				sendstream.set(fileid,0)
+				sendtime.set(fileid,(new Date()).getTime())
 				isbusy.set(fileid,false)
 				let filestream = file.stream()
 				filestream.pipeTo(new WritableStream({
@@ -1145,6 +1147,7 @@ async function fSendFile(connectId,data){
 			
 			if(large && force){
 				sendstream.set(fileid,0)
+				sendtime.set(fileid,(new Date()).getTime())
 				isbusy.set(fileid,false)
 				  const chunkSize = 1 * 1024 * 1024; // 10 MB
 				  const totalChunks = Math.ceil(file.size / chunkSize);
@@ -1251,6 +1254,8 @@ async function fReceiveFileProgress(attribute){
 			receivestream.set(fileid,currentsize)
 			const currentcomplete = (currentsize/size)*100
 			const complete = Math.floor(currentcomplete)
+			const bitrate = (1/((time-sendtime.get(fileid))/1000))*(chuncksize)
+			sendtime.set(fileid,time)
 			
 			if(!document.querySelector('.file.file-'+fileid)){
 				if(connectId != noncedata.connectId || name != noncedata.name || size != noncedata.size || type != noncedata.type)return
@@ -1258,7 +1263,7 @@ async function fReceiveFileProgress(attribute){
 				fAddExplorerFile(peer,file,fileid,time,send,complete)
 			}else{
 				document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
-				document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
+				document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(bitrate)}/s - ${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
 			}			
 			
 			if(currentcomplete == 100){
@@ -1294,6 +1299,8 @@ async function fReceiveFileProgress(attribute){
 			receivestream.set(fileid,currentsize)
 			const currentcomplete = (currentsize/size)*100
 			const complete = Math.floor(currentcomplete)
+			const bitrate = (1/((time-sendtime.get(fileid))/1000))*(chuncksize)
+			sendtime.set(fileid,time)
 			
 			if(!document.querySelector('.file.file-'+fileid)){
 				if(connectId != noncedata.connectId || name != noncedata.name || size != noncedata.size || type != noncedata.type)return
@@ -1301,7 +1308,7 @@ async function fReceiveFileProgress(attribute){
 				fAddExplorerFile(peer,file,fileid,time,send,complete)
 			}else{
 				document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
-				document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
+				document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(bitrate)}/s - ${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
 			}			
 			
 			if(currentcomplete == 100){
@@ -1416,8 +1423,10 @@ async function fSendFileProgress(attribute){
 			sendstream.set(fileid,currentsize)
 			const currentcomplete = (currentsize/size)*100
 			const complete = Math.floor(currentcomplete)
+			const bitrate = (1/((time-sendtime.get(fileid))/1000))*(chuncksize)
+			sendtime.set(fileid,time)
 			document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
-			document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
+			document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(bitrate)}/s - ${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
 			if(currentcomplete == 100){
 				//save to dbHistory
 				const item = {author:key,fileid,time,name,size,send,complete}
@@ -1440,8 +1449,10 @@ async function fSendFileProgress(attribute){
 			sendstream.set(fileid,currentsize)
 			const currentcomplete = (currentsize/size)*100
 			const complete = Math.floor(currentcomplete)
+			const bitrate = (1/((time-sendtime.get(fileid))/1000))*(chuncksize)
+			sendtime.set(fileid,time)
 			document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
-			document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
+			document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(bitrate)}/s - ${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
 			if(currentcomplete == 100){
 				//save to dbHistory
 				const item = {author:key,fileid,time,name,size,send,complete}
