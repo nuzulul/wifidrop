@@ -23,6 +23,7 @@ let dbHistory
 let connect
 let sendstream = new Map()
 let sendtime = new Map()
+let sendpercent = new Map()
 let receivestream = new Map()
 let isbusy = new Map()
 let writableStream = new Map()
@@ -1106,6 +1107,9 @@ async function fSendFile(connectId,data){
 			fAddExplorerFile(peer,file,fileid,time,send,complete)
 			
 			if(!large){
+				sendstream.set(fileid,0)
+				sendpercent.set(fileid,0)
+				sendtime.set(fileid,(new Date()).getTime())
 				let reader = new FileReader();
 				reader.onload = function() {
 					let arrayBuffer = this.result
@@ -1219,18 +1223,31 @@ async function fReceiveFileProgress(attribute){
 	const file = {name,size}
 	
 	if(!large){
+		const cachepercent = sendpercent.get(fileid)
+		if(percent == cachepercent)return
+		sendpercent.set(fileid,percent)
+		let currentsize =  (percent)*size
+		const chuncksize = Math.floor(currentsize-sendstream.get(fileid))
+		sendstream.set(fileid,currentsize)
+		const bitrate = (1/((time-sendtime.get(fileid))/1000))*(chuncksize)
+		sendtime.set(fileid,time)
+		const elapsed = Math.floor(((size-currentsize)/bitrate)*1000)
 		if(!document.querySelector('.file.file-'+fileid)){
 			if(connectId != noncedata.connectId || name != noncedata.name || size != noncedata.size || type != noncedata.type)return
 			showexplorer()
 			fAddExplorerFile(peer,file,fileid,time,send,complete)
 		}else{
 			document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
+			document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${timeLeft(elapsed)} - ${getSizeUnit(bitrate)}/s - ${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
 		}
 		
 		if(percent == 1){
 			//save to dbHistory
 			const item = {author:key,fileid,time,name,size,send,complete}
 			await dbHistory.put(fileid,item)
+			
+			document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(size)}`
+			
 			//change background colour
 			document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
 			document.querySelector('.file.file-'+fileid).dataset.complete = complete
@@ -1405,11 +1422,23 @@ async function fSendFileProgress(attribute){
 	const send = true
 	
 	if(!large){
+		const cachepercent = sendpercent.get(fileid)
+		if(percent == cachepercent)return
+		sendpercent.set(fileid,percent)
+		let currentsize =  (percent)*size
+		const chuncksize = Math.floor(currentsize-sendstream.get(fileid))
+		sendstream.set(fileid,currentsize)
+		const bitrate = (1/((time-sendtime.get(fileid))/1000))*(chuncksize)
+		sendtime.set(fileid,time)
+		const elapsed = Math.floor(((size-currentsize)/bitrate)*1000)
 		document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
+		document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${timeLeft(elapsed)} - ${getSizeUnit(bitrate)}/s - ${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
 		if(percent == 1){
 			//save to dbHistory
 			const item = {author:key,fileid,time,name,size,send,complete}
 			await dbHistory.put(fileid,item)
+			
+			document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(size)}`
 			
 			//change background colour
 			document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
