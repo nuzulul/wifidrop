@@ -10,7 +10,7 @@ WIFIDrop is an easy-to-use progressive web app (PWA) that allows users to transf
 
 ## Features
 
-* ✅ Support P2P direct connection if possible.
+* ✅ Support P2P direct connection whenever possible.
 * ✅ No need to create an account or register.
 * ✅ Automatically discover devices on the same network.
 * ✅ Transfer unlimited size of files between devices.
@@ -28,6 +28,7 @@ WIFIDrop is an easy-to-use progressive web app (PWA) that allows users to transf
 
 ```
 git clone https://github.com/nuzulul/wifidrop.git
+cd wifidrop
 npm install
 npm start
 ```
