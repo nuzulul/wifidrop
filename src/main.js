@@ -1427,15 +1427,17 @@ async function fSendFileProgress(attribute){
 	const send = true
 	
 	if(!large){
-		const cachepercent = sendpercent.get(fileid)
-		if(percent == cachepercent)return
-		sendpercent.set(fileid,percent)
-		let currentsize =  (percent)*size
-		const chuncksize = Math.floor(currentsize-sendstream.get(fileid))
+		const cachecomplete = sendpercent.get(fileid)
+		if(complete == cachecomplete)return
+		sendpercent.set(fileid,complete)
+		let currentsize =  Math.floor(percent*size)
+		let last = sendstream.get(fileid)
+		const chuncksize = currentsize-last
 		sendstream.set(fileid,currentsize)
 		const bitrate = (1/((time-sendtime.get(fileid))/1000))*(chuncksize)
 		sendtime.set(fileid,time)
 		const elapsed = Math.floor(((size-currentsize)/bitrate)*1000)
+		//console.log(`percent ${percent},complete ${complete},last ${last},size ${size},currentsize ${currentsize},chuncksize ${chuncksize},bitrate ${bitrate},elapsed ${elapsed}`)
 		document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
 		document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${timeLeft(elapsed)} - ${getSizeUnit(bitrate)}/s - ${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
 		if(percent == 1){
