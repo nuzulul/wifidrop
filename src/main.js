@@ -1258,12 +1258,16 @@ async function fReceiveFileProgress(attribute){
 				fAddExplorerFile(peer,file,fileid,time,send,complete)
 			}else{
 				document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
+				document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
 			}			
 			
 			if(currentcomplete == 100){
 				//save to dbHistory
 				const item = {author:key,fileid,time,name,size,send,complete}
 				await dbHistory.put(fileid,item)
+				
+				document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(size)}`
+				
 				//change background colour
 				document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
 				document.querySelector('.file.file-'+fileid).dataset.complete = complete
@@ -1297,12 +1301,16 @@ async function fReceiveFileProgress(attribute){
 				fAddExplorerFile(peer,file,fileid,time,send,complete)
 			}else{
 				document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
+				document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
 			}			
 			
 			if(currentcomplete == 100){
 				//save to dbHistory
 				const item = {author:key,fileid,time,name,size,send,complete}
 				await dbHistory.put(fileid,item)
+				
+				document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(size)}`
+				
 				//change background colour
 				document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
 				document.querySelector('.file.file-'+fileid).dataset.complete = complete
@@ -1409,10 +1417,13 @@ async function fSendFileProgress(attribute){
 			const currentcomplete = (currentsize/size)*100
 			const complete = Math.floor(currentcomplete)
 			document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
+			document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
 			if(currentcomplete == 100){
 				//save to dbHistory
 				const item = {author:key,fileid,time,name,size,send,complete}
 				await dbHistory.put(fileid,item)
+				
+				document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(size)}`
 				
 				//change background colour
 				document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
@@ -1430,10 +1441,13 @@ async function fSendFileProgress(attribute){
 			const currentcomplete = (currentsize/size)*100
 			const complete = Math.floor(currentcomplete)
 			document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
+			document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
 			if(currentcomplete == 100){
 				//save to dbHistory
 				const item = {author:key,fileid,time,name,size,send,complete}
 				await dbHistory.put(fileid,item)
+				
+				document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(size)}`
 				
 				//change background colour
 				document.querySelector('.file.file-'+fileid).style.backgroundColor = '#9a9fa6'
