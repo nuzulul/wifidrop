@@ -82,10 +82,13 @@ document.querySelector('#app').innerHTML = `
   </div>
 `
 
-const dropCallback = (data)=>{
+const dropCallback = (data,largedisabled)=>{
 	//console.log(data);
 	const filesid = myid+new Date().getTime().toString() + Math.floor(Math.random() * 1000000)
 	files.set(filesid,data)
+	if(largedisabled){
+		largesupport = false
+	}
 	setTimeout(()=>{
 		fOpenPeers(filesid)
 	},500)

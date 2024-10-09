@@ -64,7 +64,7 @@ export function setupDrop(element,largesupport,callback) {
 	  const dt = e.dataTransfer;
 	  const files = dt.files;
 
-	  callback(files)
+	  callback(files,true)
 	}
 	
 	function addAnimation(){
