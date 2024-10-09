@@ -351,8 +351,13 @@ void async function main() {
 
 async function fHistory(){
 	const fileHistory = await dbHistory.list()
+	let his = []
 	for(const key of fileHistory.keys){
 		const item = await dbHistory.get(key)
+		his.push(item)
+	}
+	his.sort((a,b)=>{return a.time - b.time})
+	for(const item of his){
 		const peer = await dbBio.get(item.author)
 		const fileid = item.fileid
 		const time = item.time
