@@ -15,6 +15,7 @@ WIFIDrop is an easy-to-use progressive web app (PWA) that allows users to transf
 * ✅ Automatically discover devices on the same network.
 * ✅ Transfer unlimited size of files between devices.
 * ✅ Copy paste from the clipboard between devices.
+* ✅ Secured by native WebRTC end-to-end encryption.
 
 ## Try it out!
 
