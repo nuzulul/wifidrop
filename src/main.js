@@ -1256,6 +1256,7 @@ async function fReceiveFileProgress(attribute){
 			const complete = Math.floor(currentcomplete)
 			const bitrate = (1/((time-sendtime.get(fileid))/1000))*(chuncksize)
 			sendtime.set(fileid,time)
+			const elapsed = Math.floor(((size-currentsize)/bitrate)*1000)
 			
 			if(!document.querySelector('.file.file-'+fileid)){
 				if(connectId != noncedata.connectId || name != noncedata.name || size != noncedata.size || type != noncedata.type)return
@@ -1263,7 +1264,7 @@ async function fReceiveFileProgress(attribute){
 				fAddExplorerFile(peer,file,fileid,time,send,complete)
 			}else{
 				document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
-				document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(bitrate)}/s - ${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
+				document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${timeLeft(elapsed)} - ${getSizeUnit(bitrate)}/s - ${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
 			}			
 			
 			if(currentcomplete == 100){
@@ -1301,6 +1302,7 @@ async function fReceiveFileProgress(attribute){
 			const complete = Math.floor(currentcomplete)
 			const bitrate = (1/((time-sendtime.get(fileid))/1000))*(chuncksize)
 			sendtime.set(fileid,time)
+			const elapsed = Math.floor(((size-currentsize)/bitrate)*1000)
 			
 			if(!document.querySelector('.file.file-'+fileid)){
 				if(connectId != noncedata.connectId || name != noncedata.name || size != noncedata.size || type != noncedata.type)return
@@ -1308,7 +1310,7 @@ async function fReceiveFileProgress(attribute){
 				fAddExplorerFile(peer,file,fileid,time,send,complete)
 			}else{
 				document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
-				document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(bitrate)}/s - ${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
+				document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${timeLeft(elapsed)} - ${getSizeUnit(bitrate)}/s - ${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
 			}			
 			
 			if(currentcomplete == 100){
@@ -1425,8 +1427,9 @@ async function fSendFileProgress(attribute){
 			const complete = Math.floor(currentcomplete)
 			const bitrate = (1/((time-sendtime.get(fileid))/1000))*(chuncksize)
 			sendtime.set(fileid,time)
+			const elapsed = Math.floor(((size-currentsize)/bitrate)*1000)
 			document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
-			document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(bitrate)}/s - ${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
+			document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${timeLeft(elapsed)} - ${getSizeUnit(bitrate)}/s - ${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
 			if(currentcomplete == 100){
 				//save to dbHistory
 				const item = {author:key,fileid,time,name,size,send,complete}
@@ -1451,8 +1454,9 @@ async function fSendFileProgress(attribute){
 			const complete = Math.floor(currentcomplete)
 			const bitrate = (1/((time-sendtime.get(fileid))/1000))*(chuncksize)
 			sendtime.set(fileid,time)
+			const elapsed = Math.floor(((size-currentsize)/bitrate)*1000)
 			document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
-			document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${getSizeUnit(bitrate)}/s - ${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
+			document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${timeLeft(elapsed)} - ${getSizeUnit(bitrate)}/s - ${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
 			if(currentcomplete == 100){
 				//save to dbHistory
 				const item = {author:key,fileid,time,name,size,send,complete}
@@ -1467,6 +1471,39 @@ async function fSendFileProgress(attribute){
 		}
 	}
 	
+}
+
+function timeLeft(elapsed) {
+
+    var msPerMinute = 60 * 1000;
+    var msPerHour = msPerMinute * 60;
+    var msPerDay = msPerHour * 24;
+    var msPerMonth = msPerDay * 30;
+    var msPerYear = msPerDay * 365;
+
+    if (elapsed < msPerMinute) {
+         return Math.round(elapsed/1000) + ' s left';   
+    }
+
+    else if (elapsed < msPerHour) {
+         return Math.round(elapsed/msPerMinute) + ' m left';   
+    }
+
+    else if (elapsed < msPerDay ) {
+         return Math.round(elapsed/msPerHour ) + ' h left';   
+    }
+
+    else if (elapsed < msPerMonth) {
+        return 'approximately ' + Math.round(elapsed/msPerDay) + ' d left';   
+    }
+
+    else if (elapsed < msPerYear) {
+        return 'approximately ' + Math.round(elapsed/msPerMonth) + ' mo left';   
+    }
+
+    else {
+        return 'approximately ' + Math.round(elapsed/msPerYear ) + ' y left';   
+    }
 }
 
 //HISTORY files
