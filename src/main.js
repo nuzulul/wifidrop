@@ -26,7 +26,7 @@ let receivestream = new Map()
 let isbusy = new Map()
 let writableStream = new Map()
 let largesupport = false
-const forcewarning = false
+const forcewarning = config.CONFIG_FORCE_WARNING
 const largelimit = config.CONFIG_LARGE_LIMIT
 
 //detect feature
@@ -913,19 +913,32 @@ async function fAnswerFile(connectId,data){
 			<div class="dialog answer answer-${data.filesid}">
 				<div id="parax" style="display:none;"><span style="font-size:30px;color:#fff;">X</span></div>
 				<div class="message">
-					<div class="title"><div style="padding:10px 10px;">${peer.name}</div></div>
+					<div class="title"><div style="padding:10px 10px;">Confirmation</div></div>
 					<div class="content" >
-						<div>is sending you ${fSafe(data.length)} file(s) of ${getSizeUnit(fSafe(data.size))}</div>
+						<div class="profile" style="display:flex;justify-content: center;align-items: center;"></div>
+						<div>${peer.name} wants to send you ${fSafe(data.length)} file(s) of ${getSizeUnit(fSafe(data.size))}</div>
 						<div style="height:100px;overflow:scroll;">${list}</div>
 					</div>
 					<div class="footer">
 						<button class="decline">DECLINE</button>
-						<button class="accept">ACCEPT></button>
+						<button class="accept">ACCEPT</button>
 					</div>
 				</div>
 		</div>`;
 		  
 		document.body.appendChild(para);
+
+		//add avatar
+		const avatar = fGenerateAvatar(peer.id,peer.varian)
+		const type = peer.type ? peer.type : 'none'
+		const el = `
+			<div class="peer peer-${peer.connectId}" data-peer="${peer.connectId}">
+				<div class="device"><img class="device-avatar" src="${avatar}"></div>
+				<div class="device-name"><span class="varian ${type}" style="border:2px solid #${fSafe(peer.varian)};"></span>${fSafe(peer.name)}</div>
+			</div>
+		`
+		
+		document.querySelector('.answer.answer-'+data.filesid+' .message .content .profile').innerHTML = el		
 		  
 		document.querySelector('.answer.answer-'+data.filesid+' #parax').addEventListener("click",()=>{
 			para.remove(); 

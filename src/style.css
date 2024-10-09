@@ -121,6 +121,7 @@ h1 {
 .varian.host:before {
   content: 'P2P'; /* here's the magic */
   position:absolute;
+  font-size:0.7em;
   
   /* vertically center */
   top:50%;
@@ -131,7 +132,7 @@ h1 {
   margin-left:2px; /* and add a small left margin */
   
   /* basic styles */
-  width:50px;
+  width:40px;
   padding:5px;
   border-radius:10px;
   background:#000;
@@ -152,6 +153,7 @@ h1 {
 .varian.srflx:before,.varian.prflx:before,.varian.relay:before {
   content: 'RELAY'; /* here's the magic */
   position:absolute;
+  font-size:0.7em;
   
   /* vertically center */
   top:50%;
@@ -162,7 +164,7 @@ h1 {
   margin-left:2px; /* and add a small left margin */
   
   /* basic styles */
-  width:50px;
+  width:40px;
   padding:5px;
   border-radius:10px;
   background:#000;
