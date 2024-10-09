@@ -135,7 +135,7 @@ void async function main() {
 		const id = btoa(strpublicKey)
 		me.id = id
 		var randomColor = Math.floor(Math.random()*16777215).toString(16);
-		if(randomColor.length < 6)randomColor = '#000000';
+		if(randomColor.length < 6)randomColor = '000000';
 		await dbMe.put('color',randomColor)
 		me.color = randomColor
 		const skipconfirmation = false
@@ -161,7 +161,7 @@ void async function main() {
 	}
 
 	var randomColor = Math.floor(Math.random()*16777215).toString(16);
-	if(randomColor.length < 6)randomColor = '#000000';
+	if(randomColor.length < 6)randomColor = '000000';
 	me.varian = randomColor
 	
 	fUpdateMe()
