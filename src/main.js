@@ -135,6 +135,7 @@ void async function main() {
 		const id = btoa(strpublicKey)
 		me.id = id
 		var randomColor = Math.floor(Math.random()*16777215).toString(16);
+		if(randomColor.length < 6)randomColor = '#000000';
 		await dbMe.put('color',randomColor)
 		me.color = randomColor
 		const skipconfirmation = false
@@ -160,6 +161,7 @@ void async function main() {
 	}
 
 	var randomColor = Math.floor(Math.random()*16777215).toString(16);
+	if(randomColor.length < 6)randomColor = '#000000';
 	me.varian = randomColor
 	
 	fUpdateMe()
@@ -364,7 +366,7 @@ function fGenerateAvatar(seed,color){
 
 function fUpdateMe(){
 	const avatar = fGenerateAvatar(me.id,me.varian)
-	document.querySelector('.peer.me .device-name').innerHTML = `<span class="varian" style="background:#${me.varian};"></span>`+me.name
+	document.querySelector('.peer.me .device-name').innerHTML = `<span class="varian" style="border:2px solid #${fSafe(me.varian)};background:#${me.varian};"></span>`+me.name
 	document.querySelector('.peer.me .device').innerHTML = `
 		<img class="device-avatar" src="${avatar}">
 	`
@@ -505,6 +507,57 @@ async function fAddNewPeer(connectId,data){
 	peer.id = id
 	peer.connectId = connectId
 	peers.set(connectId,peer)
+
+	//get connection type
+	const interval = setInterval(()=>{
+		connect.getConnection(async (attribute)=>{
+			//console.log('atribute',attribute)
+			const rtc = attribute.connections[connectId]
+			//console.log('rtc',rtc)
+				if(rtc){
+					const type = await rtctype()
+					//console.log('type',type)
+					let peer = peers.get(connectId)
+					peer.type = type
+					peers.set(connectId,peer)
+					fUpdateType(connectId)
+					clearInterval(interval)
+				}
+			
+			
+			async function rtctype(){
+				const stats = await rtc.getStats();
+				if(stats){
+					let selectedPairId = null;
+					for(const [key, stat] of stats){
+						if(stat.type == "transport"){
+							selectedPairId = stat.selectedCandidatePairId;
+							break;
+						}
+					}
+					let candidatePair = stats.get(selectedPairId);
+					if(!candidatePair){
+						for(const [key, stat] of stats){
+							if(stat.type == "candidate-pair" && stat.selected){
+								candidatePair = stat;
+								break;
+							}
+						}
+					}
+
+					if(candidatePair){
+						for(const [key, stat] of stats){
+							if(key == candidatePair.remoteCandidateId){
+								return stat.candidateType;
+							}
+						}
+					}
+				}
+			}
+
+		})
+	},1000)
+	
 	
 	//add to idb dbBio
 	const key = generatekey(publicKey)
@@ -512,10 +565,11 @@ async function fAddNewPeer(connectId,data){
 	
 	//add to ui
 	const avatar = fGenerateAvatar(peer.id,peer.varian)
+	const type = peer.type ? peer.type : 'none'
 	const el = `
 		<div class="peer peer-${connectId}">
 			<div class="device"><img class="device-avatar" src="${avatar}"></div>
-			<div class="device-name"><span class="varian" style="background:#${fSafe(peer.varian)};"></span>${fSafe(peer.name)}</div>
+			<div class="device-name"><span class="varian ${type}" style="border:2px solid #${fSafe(peer.varian)};"></span>${fSafe(peer.name)}</div>
 		</div>
 	`
 	document.querySelector('.peers .peer.me').insertAdjacentHTML("afterend",el)
@@ -525,10 +579,20 @@ async function fAddNewPeer(connectId,data){
 		fAddSendToList(peer,window.currentfilesid)
 	}
 
-	  document.querySelector('.peers .peer-'+connectId).addEventListener("click",()=>{
+	document.querySelector('.peers .peer-'+connectId).addEventListener("click",()=>{
 		//fOpenCliboard(data)
 		fDialogClipboard(connectId)
-	  })
+	})
+}
+
+function fUpdateType(connectId){
+	const peer = peers.get(connectId)
+	const type = peer.type
+	const nodeList = document.querySelectorAll('.peer.peer-'+connectId+' .varian')
+	for(const node of nodeList){
+		node.classList.remove("none")
+		node.classList.add(type)
+	}	
 }
 
 function fDialogClipboard(connectId){
@@ -556,7 +620,8 @@ function fDialogClipboard(connectId){
 		})
 		
 		const peer = peers.get(connectId)
-		document.querySelector('.clipboard .message .title div').innerHTML = `<span class="varian" style="background:#${fSafe(peer.varian)};"></span>${fSafe(peer.name)}'s clipboard`
+		const type = peer.type ? peer.type : 'none'
+		document.querySelector('.clipboard .message .title div').innerHTML = `<span class="varian ${type}" style="border:2px solid #${fSafe(peer.varian)};"></span>${fSafe(peer.name)}'s clipboard`
 		document.querySelector('.clipboard .message .content #clipboard').value = clipboard.has(connectId)?clipboard.get(connectId):''
 		
 		document.querySelector('.clipboard .message .footer .save').addEventListener("click",()=>{
@@ -697,10 +762,11 @@ function fAddSendToList(peer,filesid){
 		document.querySelector('.infonopeers').remove()
 	}
 	const avatar = fGenerateAvatar(peer.id,peer.varian)
+	const type = peer.type ? peer.type : 'none'
 	const el = `
 		<div class="peer peer-${peer.connectId}" data-peer="${peer.connectId}">
 			<div class="device"><img class="device-avatar" src="${avatar}"></div>
-			<div class="device-name"><span class="varian" style="background:#${fSafe(peer.varian)};"></span>${fSafe(peer.name)}</div>
+			<div class="device-name"><span class="varian ${type}" style="border:2px solid #${fSafe(peer.varian)};"></span>${fSafe(peer.name)}</div>
 		</div>
 	`
 	

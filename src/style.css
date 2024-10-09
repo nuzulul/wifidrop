@@ -111,6 +111,69 @@ h1 {
 	background:#fff;
 	border-radius:50% 50% 50% 50%;
 	margin-right:3px;
+	position:relative;
+}
+
+.varian.host{
+	background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmkgYmktYXJyb3ctbGVmdC1yaWdodCIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xIDExLjVhLjUuNSAwIDAgMCAuNS41aDExLjc5M2wtMy4xNDcgMy4xNDZhLjUuNSAwIDAgMCAuNzA4LjcwOGw0LTRhLjUuNSAwIDAgMCAwLS43MDhsLTQtNGEuNS41IDAgMCAwLS43MDguNzA4TDEzLjI5MyAxMUgxLjVhLjUuNSAwIDAgMC0uNS41bTE0LTdhLjUuNSAwIDAgMS0uNS41SDIuNzA3bDMuMTQ3IDMuMTQ2YS41LjUgMCAxIDEtLjcwOC43MDhsLTQtNGEuNS41IDAgMCAxIDAtLjcwOGw0LTRhLjUuNSAwIDEgMSAuNzA4LjcwOEwyLjcwNyA0SDE0LjVhLjUuNSAwIDAgMSAuNS41Ii8+Cjwvc3ZnPg==)
+}
+
+.varian.host:before {
+  content: 'P2P'; /* here's the magic */
+  position:absolute;
+  
+  /* vertically center */
+  top:50%;
+  transform:translateY(-50%);
+  
+  /* move to right */
+  left:100%;
+  margin-left:2px; /* and add a small left margin */
+  
+  /* basic styles */
+  width:50px;
+  padding:5px;
+  border-radius:10px;
+  background:#000;
+  color: #fff;
+  text-align:center;
+
+  display:none; /* hide by default */
+}
+
+.varian.host:hover:before {
+  display:block;
+}
+
+.varian.srflx, .varian.prflx, .varian.relay{
+	background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmkgYmktYXJyb3dzLWNvbGxhcHNlLXZlcnRpY2FsIiB2aWV3Qm94PSIwIDAgMTYgMTYiPgogIDxwYXRoIGQ9Ik04IDE1YS41LjUgMCAwIDEtLjUtLjV2LTEzYS41LjUgMCAwIDEgMSAwdjEzYS41LjUgMCAwIDEtLjUuNU0wIDhhLjUuNSAwIDAgMSAuNS0uNWgzLjc5M0wzLjE0NiA2LjM1NGEuNS41IDAgMSAxIC43MDgtLjcwOGwyIDJhLjUuNSAwIDAgMSAwIC43MDhsLTIgMmEuNS41IDAgMCAxLS43MDgtLjcwOEw0LjI5MyA4LjVILjVBLjUuNSAwIDAgMSAwIDhtMTEuNzA3LjUgMS4xNDcgMS4xNDZhLjUuNSAwIDAgMS0uNzA4LjcwOGwtMi0yYS41LjUgMCAwIDEgMC0uNzA4bDItMmEuNS41IDAgMCAxIC43MDguNzA4TDExLjcwNyA3LjVIMTUuNWEuNS41IDAgMCAxIDAgMXoiLz4KPC9zdmc+)
+}
+
+.varian.srflx:before,.varian.prflx:before,.varian.relay:before {
+  content: 'RELAY'; /* here's the magic */
+  position:absolute;
+  
+  /* vertically center */
+  top:50%;
+  transform:translateY(-50%);
+  
+  /* move to right */
+  left:100%;
+  margin-left:2px; /* and add a small left margin */
+  
+  /* basic styles */
+  width:50px;
+  padding:5px;
+  border-radius:10px;
+  background:#000;
+  color: #fff;
+  text-align:center;
+
+  display:none; /* hide by default */
+}
+
+.varian.srflx:hover:before,.varian.prflx:hover:before,.varian.relay:hover:before {
+  display:block;
 }
 
 svg#radar-circle {
