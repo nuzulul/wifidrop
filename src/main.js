@@ -291,10 +291,14 @@ void async function main() {
 	//console.log('ice',ice)
 	//console.log('me',me)
 	
-	const ip = await fetch('https://get.geojs.io/v1/ip/geo.json')
-	const json = await ip.json()	
 	const timezone = new Date().getTimezoneOffset()
-	const password = me.address+timezone+json.latitude+json.longitude
+	let password = me.address+timezone
+	
+	try{
+		const ip = await fetch('https://get.geojs.io/v1/ip/geo.json')
+		const json = await ip.json()	
+		password += json.latitude+json.longitude
+	}catch(e){}
 
 
 	connect = webconnect({
