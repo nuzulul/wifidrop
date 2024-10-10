@@ -722,6 +722,7 @@ function fStopAction(connectId){
 		const complete = node.dataset.complete
 		if(complete !== '100'){
 			node.style.backgroundColor = '#b81127';
+			node.children[2].children[1].children[0].innerHTML = 'Failed'
 		}
 
 	}
@@ -1234,7 +1235,7 @@ async function fReceiveFileProgress(attribute){
 		let currentsize =  (percent)*size
 		const chuncksize = Math.floor(currentsize-sendstream.get(fileid))
 		sendstream.set(fileid,currentsize)
-		const bitrate = (1/((time-sendtime.get(fileid))/1000))*(chuncksize)
+		const bitrate = Math.floor((1/((time-sendtime.get(fileid))/1000))*(chuncksize))
 		sendtime.set(fileid,time)
 		const elapsed = Math.floor(((size-currentsize)/bitrate)*1000)
 		if(!document.querySelector('.file.file-'+fileid)){
@@ -1276,7 +1277,7 @@ async function fReceiveFileProgress(attribute){
 			receivestream.set(fileid,currentsize)
 			const currentcomplete = (currentsize/size)*100
 			const complete = Math.floor(currentcomplete)
-			const bitrate = (1/((time-sendtime.get(fileid))/1000))*(chuncksize)
+			const bitrate = Math.floor((1/((time-sendtime.get(fileid))/1000))*(chuncksize))
 			sendtime.set(fileid,time)
 			const elapsed = Math.floor(((size-currentsize)/bitrate)*1000)
 			
@@ -1322,7 +1323,7 @@ async function fReceiveFileProgress(attribute){
 			receivestream.set(fileid,currentsize)
 			const currentcomplete = (currentsize/size)*100
 			const complete = Math.floor(currentcomplete)
-			const bitrate = (1/((time-sendtime.get(fileid))/1000))*(chuncksize)
+			const bitrate = Math.floor((1/((time-sendtime.get(fileid))/1000))*(chuncksize))
 			sendtime.set(fileid,time)
 			const elapsed = Math.floor(((size-currentsize)/bitrate)*1000)
 			
@@ -1436,7 +1437,7 @@ async function fSendFileProgress(attribute){
 		let last = sendstream.get(fileid)
 		const chuncksize = currentsize-last
 		sendstream.set(fileid,currentsize)
-		const bitrate = (1/((time-lasttime)/1000))*(chuncksize)
+		const bitrate = Math.floor((1/((time-lasttime)/1000))*(chuncksize))
 		sendtime.set(fileid,time)
 		const elapsed = Math.floor(((size-currentsize)/bitrate)*1000)
 		//console.log(`percent ${percent},time ${time},lasttime ${lasttime},complete ${complete},last ${last},size ${size},currentsize ${currentsize},chuncksize ${chuncksize},bitrate ${bitrate},elapsed ${elapsed}`)
@@ -1463,7 +1464,7 @@ async function fSendFileProgress(attribute){
 			sendstream.set(fileid,currentsize)
 			const currentcomplete = (currentsize/size)*100
 			const complete = Math.floor(currentcomplete)
-			const bitrate = (1/((time-sendtime.get(fileid))/1000))*(chuncksize)
+			const bitrate = Math.floor((1/((time-sendtime.get(fileid))/1000))*(chuncksize))
 			sendtime.set(fileid,time)
 			const elapsed = Math.floor(((size-currentsize)/bitrate)*1000)
 			document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
@@ -1490,7 +1491,7 @@ async function fSendFileProgress(attribute){
 			sendstream.set(fileid,currentsize)
 			const currentcomplete = (currentsize/size)*100
 			const complete = Math.floor(currentcomplete)
-			const bitrate = (1/((time-sendtime.get(fileid))/1000))*(chuncksize)
+			const bitrate = Math.floor((1/((time-sendtime.get(fileid))/1000))*(chuncksize))
 			sendtime.set(fileid,time)
 			const elapsed = Math.floor(((size-currentsize)/bitrate)*1000)
 			document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
