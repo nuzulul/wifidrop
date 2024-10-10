@@ -921,10 +921,10 @@ async function fAnswerFile(connectId,data){
 				<div id="parax" style="display:none;"><span style="font-size:30px;color:#fff;">X</span></div>
 				<div class="message">
 					<div class="title"><div style="padding:10px 10px;">Confirmation</div></div>
-					<div class="content" >
-						<div class="profile" style="display:flex;justify-content: center;align-items: center;"></div>
-						<div>${peer.name} wants to send you ${fSafe(data.length)} file(s) of ${getSizeUnit(fSafe(data.size))}</div>
-						<div style="height:100px;overflow:scroll;">${list}</div>
+					<div class="content" style="width:100%;">
+						<div class="profile" style="display:flex;justify-content: center;align-items: center;margin-bottom:10px;"></div>
+						<div style="padding:10px 10px;">${peer.name} wants to send you ${fSafe(data.length)} file(s) of ${getSizeUnit(fSafe(data.size))}</div>
+						<div style="max-height:125px;max-width:90%;overflow:scroll;">${list}</div>
 					</div>
 					<div class="footer">
 						<button class="decline">DECLINE</button>
@@ -1429,15 +1429,17 @@ async function fSendFileProgress(attribute){
 	if(!large){
 		const cachecomplete = sendpercent.get(fileid)
 		if(complete == cachecomplete)return
+		const lasttime = sendtime.get(fileid)
+		if(time == lasttime && complete != 100)return
 		sendpercent.set(fileid,complete)
 		let currentsize =  Math.floor(percent*size)
 		let last = sendstream.get(fileid)
 		const chuncksize = currentsize-last
 		sendstream.set(fileid,currentsize)
-		const bitrate = (1/((time-sendtime.get(fileid))/1000))*(chuncksize)
+		const bitrate = (1/((time-lasttime)/1000))*(chuncksize)
 		sendtime.set(fileid,time)
 		const elapsed = Math.floor(((size-currentsize)/bitrate)*1000)
-		//console.log(`percent ${percent},complete ${complete},last ${last},size ${size},currentsize ${currentsize},chuncksize ${chuncksize},bitrate ${bitrate},elapsed ${elapsed}`)
+		//console.log(`percent ${percent},time ${time},lasttime ${lasttime},complete ${complete},last ${last},size ${size},currentsize ${currentsize},chuncksize ${chuncksize},bitrate ${bitrate},elapsed ${elapsed}`)
 		document.querySelector('.file.file-'+fileid+' .progress').innerHTML = complete+'%'
 		document.querySelector('.file.file-'+fileid+' .size').innerHTML = `${timeLeft(elapsed)} - ${getSizeUnit(bitrate)}/s - ${getSizeUnit(currentsize)}/${getSizeUnit(size)}`
 		if(percent == 1){
