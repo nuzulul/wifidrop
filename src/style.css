@@ -122,7 +122,7 @@ h1 {
 }
 
 .varian.host:before {
-  content: 'P2P'; /* here's the magic */
+  content: 'LOCAL'; /* here's the magic */
   position:absolute;
   font-size:0.7em;
   
@@ -157,7 +157,7 @@ h1 {
 }
 
 .varian.srflx:before,.varian.prflx:before,.varian.relay:before {
-  content: 'RELAY'; /* here's the magic */
+  content: 'GLOBAL'; /* here's the magic */
   position:absolute;
   font-size:0.7em;
   
