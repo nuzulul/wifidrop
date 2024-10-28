@@ -100,7 +100,8 @@ const dropCallback = (data,largedisabled)=>{
 setupDrop(document.querySelector('#drop'),largesupport,dropCallback)
 
 navigator.serviceWorker.addEventListener('message', function (e) {
-    if (searchParams.has('receiving-file-share')) {
+	const url = new URL(window.location.href)
+    if (url.searchParams.has('receiving-file-share')) {
         const files = e.data.files
 		dropCallback(files,true)
     }

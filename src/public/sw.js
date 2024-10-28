@@ -25,30 +25,11 @@ if (workbox.navigationPreload.isSupported()) {
 }
 
 self.addEventListener('fetch', (event) => {
-  if (event.request.mode === 'navigate') {
-    event.respondWith((async () => {
-      try {
-        const preloadResp = await event.preloadResponse;
 
-        if (preloadResp) {
-          return preloadResp;
-        }
-
-        const networkResp = await fetch(event.request);
-        return networkResp;
-      } catch (error) {
-
-        const cache = await caches.open(CACHE);
-        const cachedResp = await cache.match(offlineFallbackPage);
-        return cachedResp;
-      }
-    })());
-  }
   
   const url = new URL(event.request.url)
   if (event.request.method === 'POST' && url.pathname === '/' && url.searchParams.has('share-target')) {
         event.respondWith(Response.redirect('/?receiving-file-share=1'));
-
         event.waitUntil(async function () {
             const client = await self.clients.get(event.resultingClientId);
             const data = await event.request.formData();
@@ -56,5 +37,23 @@ self.addEventListener('fetch', (event) => {
             client.postMessage({ files });
         }());
         return;
-   }
+   }else if (event.request.mode === 'navigate') {
+		event.respondWith((async () => {
+			  try {
+				const preloadResp = await event.preloadResponse;
+
+				if (preloadResp) {
+				  return preloadResp;
+				}
+
+				const networkResp = await fetch(event.request);
+				return networkResp;
+			  } catch (error) {
+
+				const cache = await caches.open(CACHE);
+				const cachedResp = await cache.match(offlineFallbackPage);
+				return cachedResp;
+			  }
+		})());
+  }
 });
