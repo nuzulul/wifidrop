@@ -26,9 +26,10 @@ if (workbox.navigationPreload.isSupported()) {
 
 self.addEventListener('fetch', (event) => {
 
-  
+  //console.log('event.request.url',event.request.url)
   const url = new URL(event.request.url)
   if (event.request.method === 'POST' && url.pathname === '/' && url.searchParams.has('share-target')) {
+		console.log('run share target start')
         event.respondWith(Response.redirect('/?receiving-file-share=1'));
         event.waitUntil(async function () {
             const client = await self.clients.get(event.resultingClientId);
@@ -36,6 +37,7 @@ self.addEventListener('fetch', (event) => {
             const files = data.getAll('files');
             client.postMessage({ files });
         }());
+		console.log('run share target finish')
         return;
    }else if (event.request.mode === 'navigate') {
 		event.respondWith((async () => {
