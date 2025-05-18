@@ -78,7 +78,7 @@ document.querySelector('#app').innerHTML = `
 		</div>	
 	</div>
 	<div class="attribution">
-		<p>WIFIDrop &copy; 2024 - Instant File Transfer Over WIFI</p>
+		<p>WIFIDrop &copy; 2024 - Peer-to-peer file transfers over WIFI</p>
 		<p><a href="https://nuzulul.github.io">Built with ❤️ by Nuzulul Zulkarnain</a></p>
 		
 	</div>

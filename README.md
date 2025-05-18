@@ -2,9 +2,9 @@
 
 Available at: [https://wifidrop.js.org](https://wifidrop.js.org)
 
-Instant WIFI Drop P2P Large File Transfer.
+Peer-to-peer file transfers over WIFI.
 
-WIFIDrop is an easy-to-use progressive web app (PWA) that allows users to transfer unlimited size of files between devices over the same WIFI network. Files are transferred securely peer-to-peer via WebRTC without any intermediary servers. This works by leveraging existing public protocol for signaling such as Torrent, Nostr and MQTT. Therefore this application is a completely client side application and can be run on any static hosting even on local host.
+WIFIDrop is an easy-to-use progressive web app (PWA) that allows users to transfer unlimited size of files between devices over the same WIFI network. Files are transferred securely peer-to-peer via WebRTC without any intermediary servers. Therefore this application is a completely client side application and can be run on any static hosting or local host.
 
 ![WIFIDrop](screenshot.jpeg)
 
