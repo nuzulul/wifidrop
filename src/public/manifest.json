@@ -1,7 +1,7 @@
 {
   "id": "WIFIDrop",
   "background_color": "#ffffff",
-  "description": "Peer-to-peer file transfers over WIFI",
+  "description": "Peer-to-peer file transfer via WIFI",
   "dir": "ltr",
   "display": "standalone",
   "name": "WIFIDrop",
