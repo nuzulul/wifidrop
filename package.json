@@ -1,7 +1,7 @@
 {
   "name": "wifidrop",
   "version": "0.0.1",
-  "description": "Peer-to-peer file transfer via WIFI",
+  "description": "Local peer-to-peer file transfer via WIFI",
   "main": "main.js",
   "private": true,
   "type": "module",
