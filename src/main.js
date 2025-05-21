@@ -305,11 +305,11 @@ void async function main() {
 	let password = me.address
 	//let password = 'wifidropglobal'
 	
-	try{
+	/*try{
 		const ip = await fetch('https://get.geojs.io/v1/ip/geo.json')
 		const json = await ip.json()	
 		password += json.latitude+json.longitude
-	}catch(e){}
+	}catch(e){}*/
 
 
 	connect = webconnect({
