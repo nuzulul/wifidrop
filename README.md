@@ -47,7 +47,7 @@ Windows : [https://apps.microsoft.com/detail/9MVN98K4BBWC](https://apps.microsof
 
 ## License
 
-[MIT](https://github.com/nuzulul/wifidrop/blob/main/LICENSE)
+[GPL-3.0](https://github.com/nuzulul/wifidrop/blob/main/LICENSE)
 
 ## Maintainers
 
