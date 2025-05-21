@@ -300,8 +300,10 @@ void async function main() {
 	//console.log('ice',ice)
 	//console.log('me',me)
 	
-	const timezone = new Date().getTimezoneOffset()
-	let password = me.address+timezone
+	//const timezone = new Date().getTimezoneOffset()
+	//let password = me.address+timezone
+	let password = me.address
+	//let password = 'wifidropglobal'
 	
 	try{
 		const ip = await fetch('https://get.geojs.io/v1/ip/geo.json')
