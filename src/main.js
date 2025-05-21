@@ -302,8 +302,7 @@ void async function main() {
 	
 	//const timezone = new Date().getTimezoneOffset()
 	//let password = me.address+timezone
-	let password = 'Tb5xazDnJy9GryD7mQnjSOmT8EL4bAkzG5WR84B7jPTX2S52J64UbtU7JRj8XBCn
--'+me.address
+	let password = 'Tb5xazDnJy9GryD7mQnjSOmT8EL4bAkzG5WR84B7jPTX2S52J64UbtU7JRj8XBCn-'+me.address
 	//let password = 'wifidropglobal'
 	
 	/*try{
