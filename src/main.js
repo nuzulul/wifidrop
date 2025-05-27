@@ -78,9 +78,8 @@ document.querySelector('#app').innerHTML = `
 		</div>	
 	</div>
 	<div class="attribution">
-		<p>WIFIDrop &copy; 2024 - Local peer-to-peer file transfer via WIFI</p>
-		<p><a target="_blank" href="https://github.com/nuzulul/wifidrop"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16"> <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/> </svg> Open Source by Nuzulul Zulkarnain</a></p>
-		
+		<p>WIFIDrop.js.org - Local peer-to-peer file transfer via WIFI</p>
+		<p><a target="_blank" href="https://github.com/nuzulul/wifidrop"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16"> <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/> </svg> Open Source</a></p>
 	</div>
   </div>
 `
@@ -1614,7 +1613,7 @@ async function fOpenOptions(){
 		<div id="parax" style="display:block;"><span style="font-size:30px;color:#fff;">X</span></div>
 		<div class="message">
 			<div class="title">
-				<div style="padding:10px 10px;">Info</div>
+				<div style="padding:10px 10px;">Settings</div>
 			</div>
 			<div class="content" >
 				<div class="item cache">
@@ -1628,7 +1627,7 @@ async function fOpenOptions(){
 				</div>
 				<div class="item skipconfirmation">
 					<input type="checkbox" id="skipconfirmation" name="skipconfirmation" value="skipconfirmation" ${checkboxskipconfirmation}>
-					<label for="skipconfirmation"> Skip download confirmation</label>
+					<label for="skipconfirmation"> Auto accept download</label>
 				</div>
 				<div class="item alias">
 					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-laptop" viewBox="0 0 16 16">
@@ -1636,6 +1635,12 @@ async function fOpenOptions(){
 					</svg>					
 					<label for="alias">Change alias:</label>
 					<input style="border:none" type="text" id="alias" name="alias" value="${me.name}">
+				</div>
+				<div class="itm downloads">
+					<p>WIFIDrop Downloads :</p>
+					<a target="_blank" href="https://wifidrop.js.org"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-browser-chrome" viewBox="0 0 16 16">   <path fill-rule="evenodd" d="M16 8a8 8 0 0 1-7.022 7.94l1.902-7.098a3 3 0 0 0 .05-1.492A3 3 0 0 0 10.237 6h5.511A8 8 0 0 1 16 8M0 8a8 8 0 0 0 7.927 8l1.426-5.321a3 3 0 0 1-.723.255 3 3 0 0 1-1.743-.147 3 3 0 0 1-1.043-.7L.633 4.876A8 8 0 0 0 0 8m5.004-.167L1.108 3.936A8.003 8.003 0 0 1 15.418 5H8.066a3 3 0 0 0-1.252.243 2.99 2.99 0 0 0-1.81 2.59M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/> </svg> Online</a> 
+					<a target="_blank" href="https://play.google.com/store/apps/details?id=org.js.wifidrop"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-android" viewBox="0 0 16 16">   <path d="M2.76 3.061a.5.5 0 0 1 .679.2l1.283 2.352A8.9 8.9 0 0 1 8 5a8.9 8.9 0 0 1 3.278.613l1.283-2.352a.5.5 0 1 1 .878.478l-1.252 2.295C14.475 7.266 16 9.477 16 12H0c0-2.523 1.525-4.734 3.813-5.966L2.56 3.74a.5.5 0 0 1 .2-.678ZM5 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2m6 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/> </svg> Android</a> 
+					<a target="_blank" href="https://apps.microsoft.com/detail/9MVN98K4BBWC"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-windows" viewBox="0 0 16 16">   <path d="M6.555 1.375 0 2.237v5.45h6.555zM0 13.795l6.555.933V8.313H0zm7.278-5.4.026 6.378L16 16V8.395zM16 0 7.33 1.244v6.414H16z"/> </svg> Windows</a> 
 				</div>
 			</div>
 		</div>
