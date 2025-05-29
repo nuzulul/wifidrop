@@ -31,13 +31,15 @@ npm install
 npm start
 ```
 
-## Production
+## Build
 
 ```
 npm run build
 ```
 
-## Download
+A new build of WIFIDrop PWA will now be available in the `/dist` directory that you can self-hosted on static hosting.
+
+## Platforms
 
 Online : [https://wifidrop.js.org](https://wifidrop.js.org)
 
@@ -45,9 +47,11 @@ Android : [https://play.google.com/store/apps/details?id=org.js.wifidrop](https:
 
 Windows : [https://apps.microsoft.com/detail/9MVN98K4BBWC](https://apps.microsoft.com/detail/9MVN98K4BBWC)
 
+Self-hosted : [https://github.com/nuzulul/wifidrop](https://github.com/nuzulul/wifidrop)
+
 ## License
 
-[GPLv3](https://github.com/nuzulul/wifidrop/blob/main/LICENSE)
+[GPL-3.0](https://github.com/nuzulul/wifidrop/blob/main/LICENSE)
 
 ## Maintainers
 
