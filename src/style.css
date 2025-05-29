@@ -415,7 +415,7 @@ svg#radar-circle {
   line-height: 1.5;
   display: inline-block;
   vertical-align: middle;
-  cursor:pointer;
+  /*cursor:pointer;*/
   display:block;
   margin:10px 10px;
 }
