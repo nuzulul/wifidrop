@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { spawn } from 'node:child_process';
 import { getAvailableBrowsers, launchBrowser } from 'detect-browsers';
 const browsers = await getAvailableBrowsers();
