@@ -49,6 +49,8 @@ Windows : [https://apps.microsoft.com/detail/9MVN98K4BBWC](https://apps.microsof
 
 Self-hosted : [https://github.com/nuzulul/wifidrop](https://github.com/nuzulul/wifidrop)
 
+NPM : [https://www.npmjs.com/package/wifidrop](https://www.npmjs.com/package/wifidrop) - `npm install -g wifidrop`
+
 ## License
 
 [GPL-3.0](https://github.com/nuzulul/wifidrop/blob/main/LICENSE)
