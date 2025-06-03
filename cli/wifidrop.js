@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { spawn } from 'node:child_process';
+import { spawn,spawnSync } from 'node:child_process';
 import { getAvailableBrowsers, launchBrowser } from 'detect-browsers';
 import path from 'node:path';
 import os from 'node:os';
@@ -259,6 +259,14 @@ const download = async ({
 	const zip = new admzip.default(zipPath);
 	zip.extractAllTo(/*target path*/ folderPath, /*overwrite*/ true);
 	await unlink(zipPath)
+	if (currentPlatform == 'linux'){
+		try {
+		  fs.chmodSync(moduleExecutablePath, 0o777);
+		  console.log('Permissions changed successfully (sync).');
+		} catch (err) {
+			console.error('Error changing permissions (sync):', err);
+		}
+	}
 	return moduleExecutablePath
 }
 
@@ -316,7 +324,7 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge1") != -1){
 	if (process.platform === 'darwin') {
 		spawn('open', [chromium,'--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Latest')], { detached: true, env});
 	}else{
-		spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Latest')], { detached: true, env });
+		spawnSync(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Latest')], { detached: true, env });
 	}
 	
 }
