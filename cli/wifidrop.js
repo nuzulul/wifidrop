@@ -265,7 +265,7 @@ const download = async ({
 
 
 
-if (browsers.findIndex((item)=>item.browser == "Microsoft Edge") != -1){
+if (browsers.findIndex((item)=>item.browser == "Microsoft Edge1") != -1){
 	const allbrowser = browsers.filter((item)=>item.browser=="Microsoft Edge");
 	for(const browser of allbrowser){
 			if (!browser.executable.endsWith('MicrosoftEdge.exe')){
@@ -300,7 +300,10 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge") != -1){
 	}else{
 		revision = await getLastChange()
 		const data = new Uint8Array(Buffer.from(revision));
-		await writeFile(chromiumRevision, data);		
+		try {
+			await mkdir(chromiumPath, { recursive: true });
+			await writeFile(chromiumRevision, data);
+		} catch (_) {}				
 	}
 
 	const chromium = await download({revision})
@@ -314,7 +317,7 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge") != -1){
 		spawn('open', [chromium,'--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Latest')], { detached: true, env});
 	}else{
 		spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Latest')], { detached: true, env });
-	}	
+	}
 	
 }
 

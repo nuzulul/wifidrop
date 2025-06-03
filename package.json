@@ -40,7 +40,7 @@
     "gh-old": "npm run removedir dist && npm run build && git add dist -f && git commit -m \"dist\" && npm run gh-deploy && git reset --soft HEAD~ && git restore --staged .",
     "gh": "npm run removedir dist && git checkout --orphan temp_branch && npm run build && git add dist -f && git commit -m \"dist\" && npm run gh-deploy && git checkout main && git branch -D temp_branch",
 	"snapcraftclone": "node -e \"import { copyFile } from 'node:fs/promises'; import fs from 'node:fs'; import { promisify } from 'node:util'; const mkdir = promisify(fs.mkdir); try { await mkdir('dist/cli', { recursive: true }); await mkdir('dist/snap', { recursive: true }); await copyFile('./package.json', './dist/package.json'); await copyFile('./cli/wifidrop.js', './dist/cli/wifidrop.js'); await copyFile('./snap/snapcraft.yaml', './dist/snap/snapcraft.yaml'); } catch (err) {console.log('Clone error');}; process.exit(0);\"",
-	"snapcraft": "npm run removedir dist && npm run snapcraftclone && git init && git add . && git commit -am \"initial commit\" && docker run --rm -it --privileged -v %cd%/dist:/data -w /data diddledani/snapcraft:core22"
+	"snapcraft": "docker run --rm -it --privileged -v %cd%:/data -w /data diddledani/snapcraft:core22"
   },
   "repository": {
     "type": "git",
