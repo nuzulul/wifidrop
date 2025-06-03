@@ -1,6 +1,6 @@
 {
   "name": "wifidrop",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Local peer-to-peer file transfer via WIFI",
   "main": "cli/wifidrop.js",
   "bin": "./cli/wifidrop.js",
@@ -14,6 +14,7 @@
   },
   "type": "module",
   "dependencies": {
+    "adm-zip": "^0.5.16",
     "detect-browsers": "^6.1.0",
     "kv-storage": "^0.0.9",
     "webconnect": "^0.0.10"

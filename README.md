@@ -55,6 +55,6 @@ NPM : [https://www.npmjs.com/package/wifidrop](https://www.npmjs.com/package/wif
 
 [GPL-3.0](https://github.com/nuzulul/wifidrop/blob/main/LICENSE)
 
-## Maintainers
+## Maintainer
 
 [Nuzulul Zulkarnain](https://github.com/nuzulul)
