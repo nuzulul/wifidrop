@@ -343,8 +343,10 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge") != -1){
 	if (process.platform === 'darwin') {
 		spawn('open', [chromium,'--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Latest')], { detached: true, env});
 	}else{
-		//spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Latest')], { detached: true, env });
-		spawnSync(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Latest')], {stdio: 'inherit', detached: true, env });
+		//for production
+		spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Latest')], { detached: true, env });
+		//for debug
+		//spawnSync(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Latest')], {stdio: 'inherit', detached: true, env });
 	}
 	
 }

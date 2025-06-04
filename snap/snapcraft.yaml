@@ -12,7 +12,7 @@ issues: https://github.com/nuzulul/wifidrop/issues
 source-code: https://github.com/nuzulul/wifidrop
 license: GPL-3.0
 icon: snap/wifidrop.png
-confinement: devmode
+confinement: strict
 base: core22
 
 apps:
