@@ -5,7 +5,7 @@ description: |
   Run with:-
     $ wifidrop
 
-confinement: strict
+confinement: devmode
 base: core22
 
 apps:

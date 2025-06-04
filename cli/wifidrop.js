@@ -273,7 +273,7 @@ const download = async ({
 
 
 
-if (browsers.findIndex((item)=>item.browser == "Microsoft Edge1") != -1){
+if (browsers.findIndex((item)=>item.browser == "Microsoft Edge") != -1){
 	const allbrowser = browsers.filter((item)=>item.browser=="Microsoft Edge");
 	for(const browser of allbrowser){
 			if (!browser.executable.endsWith('MicrosoftEdge.exe')){
@@ -306,8 +306,8 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge1") != -1){
 	if(fs.existsSync(chromiumRevision)){
 		revision = await readFile(chromiumRevision)
 	}else{
-		revision = await getLastChange()
-		const data = new Uint8Array(Buffer.from(revision));
+		//revision = await getLastChange()
+		//const data = new Uint8Array(Buffer.from(revision));
 		try {
 			await mkdir(chromiumPath, { recursive: true });
 			//await writeFile(chromiumRevision, data);
