@@ -233,6 +233,11 @@ const download = async ({
 		await stat(moduleExecutablePath)
 		return moduleExecutablePath
 	} catch (_) {}  
+	
+	if (process.platform === 'linux'){
+		console.log('Installing dependencies ...');
+		spawnSync('sudo', ['apt-get','install','-y','ca-certificates','fonts-liberation','libappindicator3-1','libasound2t64','libatk-bridge2.0-0','libatk1.0-0','libc6','libcairo2','libcups2','libdbus-1-3','libexpat1','libfontconfig1','libgbm1','libgcc1','libglib2.0-0','libgtk-3-0','libnspr4','libnss3','libpango-1.0-0','libpangocairo-1.0-0','libstdc++6','libx11-6','libx11-xcb1','libxcb1','libxcomposite1','libxcursor1','libxdamage1','libxext6','libxfixes3','libxi6','libxrandr2','libxrender1','libxss1','libxtst6','lsb-release','wget','xdg-utils'],{stdio: 'inherit'});		
+	}
 
 	let url = downloadURL(platform, revision)
 
@@ -259,7 +264,7 @@ const download = async ({
 	const zip = new admzip.default(zipPath);
 	zip.extractAllTo(/*target path*/ folderPath, /*overwrite*/ true);
 	await unlink(zipPath)
-	if (currentPlatform == 'linux'){
+	if (process.platform === 'linux'){
 		try {
 		  fs.chmodSync(moduleExecutablePath, 0o777);
 		  console.log('Permissions changed successfully (sync).');
@@ -301,17 +306,30 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge") != -1){
 	}	
 } else {
 	
-	let revision = '1468493'
+	let revision = '1468493'; //windows 06-2025
 	
 	if(fs.existsSync(chromiumRevision)){
-		revision = await readFile(chromiumRevision)
+		
+		revision = await readFile(chromiumRevision);
+		
 	}else{
+		
+		//static revision
+		if(process.platform === 'linux'){
+			revision = '1469089'; //linux 06-2025
+		}else if(process.platform === 'darwin'){
+			revision = '1469109'; //mac 06-2025
+		}else if(process.platform === 'win32'){
+			revision = '1468493'; //windows 06-2025
+		}
+		
+		//dynamic revision get latest
 		//revision = await getLastChange()
-		//const data = new Uint8Array(Buffer.from(revision));
+		
+		const data = new Uint8Array(Buffer.from(revision));
 		try {
 			await mkdir(chromiumPath, { recursive: true });
-			//await writeFile(chromiumRevision, data);
-			await writeFile(chromiumRevision, revision);
+			await writeFile(chromiumRevision, data);
 		} catch (_) {}				
 	}
 
