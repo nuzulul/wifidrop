@@ -1,16 +1,31 @@
 name: wifidrop
+title: WIFIDrop
 version: git
 summary: Local peer-to-peer file transfer via WIFI.
 description: |
   Run with:-
     $ wifidrop
 
+website: https://wifidrop.js.org
+contact: https://github.com/nuzulul/wifidrop/issues
+issues: https://github.com/nuzulul/wifidrop/issues
+source-code: https://github.com/nuzulul/wifidrop
+license: GPL-3.0
+icon: snap/wifidrop.png
 confinement: devmode
 base: core22
 
 apps:
   wifidrop:
     command: bin/wifidrop
+    extensions: [gnome]
+    plugs:
+    - home
+    - browser-support
+    - network
+    - network-bind    
+    environment:
+      TMPDIR: $XDG_RUNTIME_DIR    
 
 parts:
   wifidrop:
