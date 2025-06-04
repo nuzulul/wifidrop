@@ -310,7 +310,8 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge1") != -1){
 		const data = new Uint8Array(Buffer.from(revision));
 		try {
 			await mkdir(chromiumPath, { recursive: true });
-			await writeFile(chromiumRevision, data);
+			//await writeFile(chromiumRevision, data);
+			await writeFile(chromiumRevision, revision);
 		} catch (_) {}				
 	}
 
@@ -324,7 +325,7 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge1") != -1){
 	if (process.platform === 'darwin') {
 		spawn('open', [chromium,'--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Latest')], { detached: true, env});
 	}else{
-		spawnSync(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Latest')], { detached: true, env });
+		spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Latest')], { detached: true, env });
 	}
 	
 }
