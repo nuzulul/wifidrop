@@ -266,7 +266,7 @@ const download = async ({
 	await unlink(zipPath)
 	if (process.platform === 'linux'){
 		try {
-		  fs.chmodSync(moduleExecutablePath, 0o777);
+		  fs.chmodSync(moduleExecutablePath, 0o777);	  
 		  console.log('Permissions changed successfully (sync).');
 		} catch (err) {
 			console.error('Error changing permissions (sync):', err);
@@ -341,12 +341,31 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge") != -1){
 	env.GOOGLE_DEFAULT_CLIENT_SECRET = "no"
 	
 	if (process.platform === 'darwin') {
-		spawn('open', [chromium,'--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Latest')], { detached: true, env});
+		spawn('open', [chromium,'--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env});
+	}else if (process.platform === 'linux'){
+		if (process.env.SNAP_NAME === 'wifidrop'){
+			console.log('snapcraft')
+			
+				//const sandbox = chromium+'_sandbox'
+				
+				//env.CHROME_DEVEL_SANDBOX = sandbox
+				
+				//for production
+				spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled'),'--no-sandbox'], { detached: true, env });
+				
+				//for debug
+				//spawnSync(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], {stdio: 'inherit', detached: true, env });
+			
+				//for debug nosandbox
+				//spawnSync(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled'),'--no-sandbox'], {stdio: 'inherit', detached: true, env });
+			
+		}else{
+			spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env });
+		}
+	}else if (process.platform === 'win32'){
+		spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env });
 	}else{
-		//for production
-		//spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Latest')], { detached: true, env });
-		//for debug
-		spawnSync(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Latest')], {stdio: 'inherit', detached: true, env });
+		console.log(`Platform ${process.platform} not supported.`)
 	}
 	
 }

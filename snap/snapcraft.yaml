@@ -12,8 +12,10 @@ issues: https://github.com/nuzulul/wifidrop/issues
 source-code: https://github.com/nuzulul/wifidrop
 license: GPL-3.0
 icon: snap/wifidrop.png
-confinement: devmode
+
+confinement: strict
 base: core22
+grade: stable
 
 apps:
   wifidrop:
@@ -21,8 +23,16 @@ apps:
     extensions: [gnome]
     plugs:
     - home
+    - desktop
+    - desktop-legacy
+    - x11
+    - unity7
+    - wayland
     - browser-support
     - network
+    - gsettings
+    - pulseaudio
+    - opengl
     - network-bind    
     environment:
       TMPDIR: $XDG_RUNTIME_DIR    
