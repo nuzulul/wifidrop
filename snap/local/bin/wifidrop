@@ -16,4 +16,4 @@ export GROFF_TMAC_PATH=$SNAP/usr/share/groff/current/tmac
 # As a result, it creates desktop files with an appropriate Exec= line.
 export CHROME_WRAPPER=/snap/bin/$SNAP_INSTANCE_NAME
   
-exec "$SNAP/usr/lib/chromium-browser/chrome" --no-sandbox --app=https://wifidrop.js.org
+exec "$SNAP/usr/lib/chromium-browser/chrome" --app=https://wifidrop.js.org
