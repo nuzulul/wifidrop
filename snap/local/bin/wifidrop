@@ -1,0 +1,19 @@
+#!/bin/sh
+
+
+# Custom version string for chrome://version
+export CHROME_VERSION_EXTRA=snap
+
+# Configuration for the "man" binary, which is invoked when chromium is called
+# with the "-h" (or "--help") argument (see https://launchpad.net/bugs/1848083)
+export MAN_TEST_DISABLE_SYSTEM_CONFIG=1
+export MANPATH=$SNAP
+export GROFF_FONT_PATH=$SNAP/usr/share/groff/current/font
+export GROFF_TMAC_PATH=$SNAP/usr/share/groff/current/tmac
+
+# This convinces Chromium that it is running from /snap/bin instead of the
+# unconfined path, /snap/*/*/usr/lib/chromium-browser/chrome.
+# As a result, it creates desktop files with an appropriate Exec= line.
+export CHROME_WRAPPER=/snap/bin/$SNAP_INSTANCE_NAME
+  
+exec "$SNAP/usr/lib/chromium-browser/chrome" --no-sandbox --app=https://wifidrop.js.org
