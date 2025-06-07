@@ -34,17 +34,17 @@ async function openChromiumBrowser(browser,address){
 
 function getAppDataDir(appName) {
   let appDataDir;
+  const publisher = 'naroilstudio';
   if (process.platform === 'win32') {
-    appDataDir = (process.env.APPDATA && path.join(process.env.APPDATA, 'Narojil Studio')) || (process.env.LOCALAPPDATA && path.join(process.env.LOCALAPPDATA, 'Narojil Studio')) || path.join(os.homedir(), 'AppData', 'Roaming', 'Narojil Studio');
+    appDataDir = (process.env.LOCALAPPDATA && path.join(process.env.LOCALAPPDATA, publisher)) || path.join(os.homedir(), 'AppData', 'Local', publisher) ;
   } else if (process.platform === 'darwin') {
-    appDataDir = path.join(os.homedir(), 'Library', 'Application Support', 'Narojil Studio');
-  } else {
-    appDataDir = (process.env.XDG_DATA_HOME && path.join(process.env.XDG_DATA_HOME, 'Narojil Studio')) || path.join(os.homedir(), '.local', 'share', 'Narojil Studio');
+    appDataDir = path.join(os.homedir(), 'Library', 'Caches', publisher);
+  } else if (process.platform === 'linux'){
+    appDataDir = (process.env.XDG_CACHE_HOME && path.join(process.env.XDG_CACHE_HOME, publisher)) || path.join(os.homedir(), '.cache', publisher);
   }
 
   return path.join(appDataDir, appName);
 }
-
 
 const revisionChange = 591479
 
@@ -344,14 +344,15 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge") != -1){
 		spawn('open', [chromium,'--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env});
 	}else if (process.platform === 'linux'){
 		if (process.env.SNAP_NAME === 'wifidrop'){
-			console.log('snapcraft')
 			
-				//const sandbox = chromium+'_sandbox'
+				console.log('snapcraft')
+			
+				const sandbox = process.env.SNAP+'/usr/lib/chromium-browser/chrome-sandbox'
 				
-				//env.CHROME_DEVEL_SANDBOX = sandbox
+				env.CHROME_DEVEL_SANDBOX = sandbox
 				
 				//for production
-				spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled'),'--no-sandbox'], { detached: true, env });
+				spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env });
 				
 				//for debug
 				//spawnSync(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], {stdio: 'inherit', detached: true, env });
@@ -370,6 +371,6 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge") != -1){
 	
 }
 
-console.log('WIFIDrop starting ...')
+console.log('WIFIDrop https://wifidrop.js.org')
 
 process.exit()
