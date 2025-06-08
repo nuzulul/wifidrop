@@ -29,6 +29,24 @@ const listrequiredpackage = ['ca-certificates','fonts-liberation','libappindicat
 if (process.platform === 'linux' && process.env.SNAP_NAME === 'wifidrop'){
 	chromiumPath = process.env.SNAP_REAL_HOME+'/Public/narojilstudio/chromium'
 	chromiumRevision = path.join(chromiumPath, 'revision')
+	
+	if (process.getuid() === 0){
+		console.error('ok')
+		const exe = promisify(exec)
+		const file = ''
+		
+		const tmp = '/var/tmp/narojilstudio'
+		
+		if(fs.existsSync(tmp+'/chromium')){
+			
+			const file = await readFile(tmp+'/chromium');
+			const sandbox = file+'_sandbox'
+			const chown = await exe('chown root:root '+sandbox)
+			const chmod = await exe('chmod 4755 '+sandbox)			
+		}	
+		process.exit()
+	}		
+	
 }
 
 async function openChromiumBrowser(browser,address){
@@ -521,12 +539,39 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge1") != -1){
 			
 				console.log('Running WIFIDrop snap')
 			
-				const sandbox = process.env.SNAP+'/usr/lib/chromium-browser/chrome-sandbox'
+				const sandbox = chromium+'_sandbox'
+				//console.log('sandbox',sandbox)
+				
+				const tmp = '/var/tmp/narojilstudio'
+				const data = new Uint8Array(Buffer.from(chromium));
+				try {
+					await mkdir(tmp, { recursive: true });
+					await writeFile(tmp+'/chromium', data);
+				} catch (_) {}					
+				
+				const owner = await stat(sandbox)
+				
+				const uid = owner.uid
+				
+				const gid = owner.gid
+				
+				const exe = promisify(exec)
+				
+				const cmhod = await exe("stat -c \"%a %n\" "+sandbox)
+				
+				const octal = cmhod.stdout.split(' ')[0]
 				
 				env.CHROME_DEVEL_SANDBOX = sandbox
 				
 				//production
-				spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env });
+				if(uid == 0 && gid == 0  && octal === '4755'){
+					spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env });
+				}else{
+					const msg = 'To activate sandbox and remove warning you should have sudo privilege, in terminal : sudo wifidrop'
+					console.log(msg);
+					spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled'),'--no-sandbox'], { detached: true, env });
+					//if(args.length > 0 && args[0] === '-desktop'){popup(msg)}
+				}
 				
 				//debug
 				//spawnSync(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], {stdio: 'inherit', detached: true, env });

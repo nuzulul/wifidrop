@@ -38,20 +38,6 @@ apps:
       TMPDIR: $XDG_RUNTIME_DIR     
 
 parts:
-  sandbox:
-    plugin: nil
-    stage-snaps:
-      - chromium/latest/stable  
-    stage:
-      - usr/lib/chromium-browser/chrome-sandbox
-    override-prime: |
-      
-      # Fix resource permissions
-      chown root:root $CRAFT_STAGE/usr/lib/chromium-browser/chrome-sandbox
-      chmod 4755 $CRAFT_STAGE/usr/lib/chromium-browser/chrome-sandbox
-      
-      snapcraftctl prime    
-
   wifidrop:
     plugin: npm
     npm-include-node: true
