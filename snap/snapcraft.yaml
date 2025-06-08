@@ -35,7 +35,7 @@ apps:
     - opengl
     - network-bind    
     environment:
-      TMPDIR: $XDG_RUNTIME_DIR    
+      TMPDIR: $XDG_RUNTIME_DIR     
 
 parts:
   sandbox:
@@ -94,4 +94,5 @@ parts:
       - libxtst6
       - lsb-release
       - wget
-      - xdg-utils      
+      - xdg-utils  
+      - gxmessage      

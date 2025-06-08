@@ -2,6 +2,6 @@
 Type=Application
 Name=WIFIDrop
 Icon=${SNAP}/meta/gui/wifidrop.png
-Exec=wifidrop
+Exec=wifidrop -desktop
 Terminal=false
 Categories=Utility;

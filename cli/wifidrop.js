@@ -19,12 +19,17 @@ const unlink = promisify(fs.unlink)
 const mkdir = promisify(fs.mkdir)
 const stat = promisify(fs.stat)
 const browsers = await getAvailableBrowsers();
-const chromiumPath = getAppDataDir('chromium')
-const chromiumRevision = path.join(chromiumPath, 'revision')
+let chromiumPath = getAppDataDir('chromium')
+let chromiumRevision = path.join(chromiumPath, 'revision')
 const address = 'https://wifidrop.js.org'
 const userdata = getAppDataDir('wifidrop')
 const args = process.argv.slice(2);
 const listrequiredpackage = ['ca-certificates','fonts-liberation','libappindicator3-1','libasound2t64','libatk-bridge2.0-0','libatk1.0-0','libc6','libcairo2','libcups2','libdbus-1-3','libexpat1','libfontconfig1','libgbm1','libgcc1','libglib2.0-0','libgtk-3-0','libnspr4','libnss3','libpango-1.0-0','libpangocairo-1.0-0','libstdc++6','libx11-6','libx11-xcb1','libxcb1','libxcomposite1','libxcursor1','libxdamage1','libxext6','libxfixes3','libxi6','libxrandr2','libxrender1','libxss1','libxtst6','lsb-release','wget','xdg-utils']
+
+if (process.platform === 'linux' && process.env.SNAP_NAME === 'wifidrop'){
+	chromiumPath = process.env.SNAP_REAL_HOME+'/Public/narojilstudio/chromium'
+	chromiumRevision = path.join(chromiumPath, 'revision')
+}
 
 async function openChromiumBrowser(browser,address){
 	if (process.platform === 'darwin') {
@@ -224,7 +229,7 @@ function popup(msg){
   
   if (process.platform === 'win32') {
 
-		exec('powershell (New-Object -ComObject Wscript.Shell).Popup("""'+msg+'""",300,"""WIFIDrop""",0x40)'); 
+		exec('powershell (New-Object -ComObject Wscript.Shell).Popup("""'+msg+'""",1800,"""WIFIDrop""",0x40)'); 
     
   } else if (process.platform === 'darwin') {
 	  
@@ -237,11 +242,11 @@ function popup(msg){
     
   } else if (process.platform === 'linux'){
 	  
-	   const xmessage = spawn('xmessage', ['-center',msg,'-timeout',300], { detached: true });
+	   const xmessage = spawn('xmessage', ['-center',msg,'-timeout',1800], { detached: true });
 	   xmessage.on('error', (err) => {console.log('xmessage not found');});
-	   const kdialog = spawn('kdialog', ['--title',msg,300], { detached: true });
+	   const kdialog = spawn('kdialog', ['--title',msg,1800], { detached: true });
 	   kdialog.on('error', (err) => {console.log('kdialog not found');});
-	   const zenity = spawn('zenity', ['--info','--text="'+msg+'"','--title="WIFIDrop"',300], { detached: true });
+	   const zenity = spawn('zenity', ['--info','--text="'+msg+'"','--title="WIFIDrop"',1800], { detached: true });
 	   zenity.on('error', (err) => {console.log('zenity not found');});
 	   const gxmessage = spawn('gxmessage', [msg], { detached: true });
 	   gxmessage.on('error', (err) => {console.log('gxmessage not found');});
@@ -419,7 +424,7 @@ const download = async ({
 	console.log("No compatible browser detected, downloading chromimum ...");
 	console.log("Source :", url);
 	
-	if(args.length > 0 && args[0] === '-desktop'){popup('Please wait a moment while WIFIDrop is preparing the components ...')}
+	if(args.length > 0 && args[0] === '-desktop'){popup('Loading ... please wait WIFIDrop will be auto launched after preparing the components ...')}
 	
 	let writer = createWriteStream(zipPath)
 	const data = await fetchWithProgress(url)
@@ -514,7 +519,7 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge1") != -1){
 	}else if (process.platform === 'linux'){
 		if (process.env.SNAP_NAME === 'wifidrop'){
 			
-				console.log('snapcraft')
+				console.log('Running WIFIDrop snap')
 			
 				const sandbox = process.env.SNAP+'/usr/lib/chromium-browser/chrome-sandbox'
 				
