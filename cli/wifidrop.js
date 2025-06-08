@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { spawn,spawnSync } from 'node:child_process';
+import { spawn,spawnSync,exec } from 'node:child_process';
 import { getAvailableBrowsers, launchBrowser } from 'detect-browsers';
 import path from 'node:path';
 import os from 'node:os';
@@ -23,6 +23,8 @@ const chromiumPath = getAppDataDir('chromium')
 const chromiumRevision = path.join(chromiumPath, 'revision')
 const address = 'https://wifidrop.js.org'
 const userdata = getAppDataDir('wifidrop')
+const args = process.argv.slice(2);
+const listrequiredpackage = ['ca-certificates','fonts-liberation','libappindicator3-1','libasound2t64','libatk-bridge2.0-0','libatk1.0-0','libc6','libcairo2','libcups2','libdbus-1-3','libexpat1','libfontconfig1','libgbm1','libgcc1','libglib2.0-0','libgtk-3-0','libnspr4','libnss3','libpango-1.0-0','libpangocairo-1.0-0','libstdc++6','libx11-6','libx11-xcb1','libxcb1','libxcomposite1','libxcursor1','libxdamage1','libxext6','libxfixes3','libxi6','libxrandr2','libxrender1','libxss1','libxtst6','lsb-release','wget','xdg-utils']
 
 async function openChromiumBrowser(browser,address){
 	if (process.platform === 'darwin') {
@@ -218,6 +220,82 @@ async function fetchWithProgress(url) {
   return allChunks;
 }
 
+function popup(msg){
+  
+  if (process.platform === 'win32') {
+
+		exec('powershell (New-Object -ComObject Wscript.Shell).Popup("""'+msg+'""",300,"""WIFIDrop""",0x40)'); 
+    
+  } else if (process.platform === 'darwin') {
+	  
+	   const type = 1;
+       let script = 'tell app \"System Events\" to display dialog ';
+       script += '\"' + msg + '\" with title \"WIFIDrop" buttons \"OK\"';
+       script += ' with icon ' + type;	
+	   const osascript = spawn('osascript', ['-e',script], { detached: true });
+	   osascript.on('error', (err) => {console.log('osascript not found');});	  
+    
+  } else if (process.platform === 'linux'){
+	  
+	   const xmessage = spawn('xmessage', ['-center',msg,'-timeout',300], { detached: true });
+	   xmessage.on('error', (err) => {console.log('xmessage not found');});
+	   const kdialog = spawn('kdialog', ['--title',msg,300], { detached: true });
+	   kdialog.on('error', (err) => {console.log('kdialog not found');});
+	   const zenity = spawn('zenity', ['--info','--text="'+msg+'"','--title="WIFIDrop"',300], { detached: true });
+	   zenity.on('error', (err) => {console.log('zenity not found');});
+	   const gxmessage = spawn('gxmessage', [msg], { detached: true });
+	   gxmessage.on('error', (err) => {console.log('gxmessage not found');});
+	   
+  }
+}
+
+function getDistro() {
+  const platform = os.platform();
+  if (platform !== 'linux') {
+    return 'Not a Linux system';
+  }
+
+  try {
+    const osRelease = fs.readFileSync('/etc/os-release', 'utf-8');
+    const lines = osRelease.split('\n');
+    let id = '';
+    for (const line of lines) {
+      if (line.startsWith('ID=')) {
+        id = line.substring(3).replace(/"/g, '');
+        break;
+      }
+    }
+    if (id === 'ubuntu') {
+      return 'Ubuntu';
+    } else if (id === 'rhel' || id === 'centos' || id === 'fedora') {
+      return 'Red Hat based';
+    } else {
+      return 'Other Linux';
+    }
+
+  } catch (error) {
+      return 'Could not determine distro';
+  }
+}
+
+function isPackageInstalled(packageName) {
+ return new Promise((resolve) => {
+   const distro = getDistro();
+   console.log('distro',distro)
+   if(distro === 'Ubuntu'){
+	   const dpkg = spawn('dpkg', ['-s', packageName]);
+	   dpkg.on('close', (code) => {
+		 resolve(code === 0);
+	   });
+   }else{
+	   const rpm = spawn('rpm', ['-q', packageName]);
+	   rpm.on('close', (code) => {
+		 resolve(code === 0);
+	   });			   
+   }
+ });
+}
+
 const download = async ({
   platform: platform = currentPlatform,
   revision: revision = '591479',
@@ -235,8 +313,94 @@ const download = async ({
 	} catch (_) {}  
 	
 	if (process.platform === 'linux' && process.env.SNAP_NAME !== 'wifidrop'){
-		console.log('Installing dependencies ...');
-		spawnSync('sudo', ['apt-get','install','-y','ca-certificates','fonts-liberation','libappindicator3-1','libasound2t64','libatk-bridge2.0-0','libatk1.0-0','libc6','libcairo2','libcups2','libdbus-1-3','libexpat1','libfontconfig1','libgbm1','libgcc1','libglib2.0-0','libgtk-3-0','libnspr4','libnss3','libpango-1.0-0','libpangocairo-1.0-0','libstdc++6','libx11-6','libx11-xcb1','libxcb1','libxcomposite1','libxcursor1','libxdamage1','libxext6','libxfixes3','libxi6','libxrandr2','libxrender1','libxss1','libxtst6','lsb-release','wget','xdg-utils'],{stdio: 'inherit'});		
+		
+		
+		console.log('check pre-requisites');
+		
+		const distro = getDistro()
+		
+		if(distro == 'Ubuntu'){
+			
+			if(args.length > 0 && args[0] === '--install-dependencies-force'){
+		
+				const apt = ['apt-get','install','-y'];
+				const install = apt.concat(listrequiredpackage);
+				spawnSync('sudo',install,{stdio: 'inherit'});
+				process.exit()
+				
+			}else{			
+		
+				const exe = promisify(exec)
+
+				let noninstalled = []
+				let datainstall = await exe('apt list --installed')
+				for(const item of listrequiredpackage){
+					if(!datainstall.stdout.includes(item+'/')){
+						noninstalled.push(item)
+					}
+				}
+				//console.log('noninstalled',noninstalled)
+				const com = []
+				for(const item of noninstalled){
+					const input = exe('apt-cache search '+item)
+					com.push(input)
+				}
+				const datasearch = await Promise.all(com)	
+				for(let i=0;i<datasearch.length;i++){
+					let pkg = noninstalled[i]
+					const out = datasearch[i]
+					if(out.stdout !== ''){
+						const arr = out.stdout.split('\n')
+						const filt = arr.filter((x)=>x.includes(pkg) && !x.includes('-dev'))
+						if(filt.length>0){
+							const str = filt[0].split(' - ');
+							const found = str[0];
+							noninstalled[i] = found;
+						}else{
+							const str = arr[0].split(' - ');
+							const found = str[0];
+							noninstalled[i] = found;
+						}
+					}
+				}
+				//console.log('noninstalled',noninstalled)
+				let finalnoninstalled = []
+				for(const item of noninstalled){
+					if(!datainstall.stdout.includes(item+'/')){
+						finalnoninstalled.push(item)
+					}
+				}
+				//console.log('finalnoninstalled',finalnoninstalled)
+				
+				if(finalnoninstalled.length > 0){
+					if (process.getuid() === 0){
+						const apt = ['install','-y'];
+						const install = apt.concat(finalnoninstalled);
+						spawnSync('apt-get',install,{stdio: 'inherit'});
+						process.exit()
+					}else{
+						console.error('need to install the must-have pre-requisites',JSON.stringify(finalnoninstalled));
+						console.error('you should have sudo privilege to run this script');
+						console.error('in terminal : [ sudo npx wifidrop ] or [wifidrop --install-dependencies-force]');
+						if(args.length > 0 && args[0] === '-desktop'){popup('Need to install the must-have pre-requisites, you should have sudo privilege to run this script, in terminal : [ sudo npx wifidrop ] or [wifidrop --install-dependencies-force] ')}
+						process.exit()
+					}
+				}					
+			}
+		} else if(distro == 'Red Hat based'){
+				console.error('need to install the must-have pre-requisites',JSON.stringify(listrequiredpackage));
+				const apt = ['yum','install'];
+				const install = apt.concat(listrequiredpackage);
+				spawnSync('sudo',install,{stdio: 'inherit'});
+							
+		}else{
+			console.error('need to install the must-have pre-requisites',JSON.stringify(listrequiredpackage));
+		}
+		
+		if (process.getuid() === 0){
+			console.error('ok')
+			process.exit()
+		}
 	}
 
 	let url = downloadURL(platform, revision)
@@ -254,6 +418,8 @@ const download = async ({
 	const fileName = url.split("/").pop();
 	console.log("No compatible browser detected, downloading chromimum ...");
 	console.log("Source :", url);
+	
+	if(args.length > 0 && args[0] === '-desktop'){popup('Please wait a moment while WIFIDrop is preparing the components ...')}
 	
 	let writer = createWriteStream(zipPath)
 	const data = await fetchWithProgress(url)
@@ -278,7 +444,7 @@ const download = async ({
 
 
 
-if (browsers.findIndex((item)=>item.browser == "Microsoft Edge") != -1){
+if (browsers.findIndex((item)=>item.browser == "Microsoft Edge1") != -1){
 	const allbrowser = browsers.filter((item)=>item.browser=="Microsoft Edge");
 	for(const browser of allbrowser){
 			if (!browser.executable.endsWith('MicrosoftEdge.exe')){
@@ -305,6 +471,9 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge") != -1){
 			break
 	}	
 } else {
+	
+	//spawnSync('rm',['-r',chromiumPath],{stdio: 'inherit'});
+	//process.exit()
 	
 	let revision = '1468493'; //windows 06-2025
 	
@@ -351,20 +520,25 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge") != -1){
 				
 				env.CHROME_DEVEL_SANDBOX = sandbox
 				
-				//for production
+				//production
 				spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env });
 				
-				//for debug
+				//debug
 				//spawnSync(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], {stdio: 'inherit', detached: true, env });
 			
-				//for debug nosandbox
+				//debug nosandbox
 				//spawnSync(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled'),'--no-sandbox'], {stdio: 'inherit', detached: true, env });
 			
 		}else{
+			const distro = getDistro()
+			if(distro !== 'Ubuntu' && distro !== 'Red Hat based'){
+				console.error('need to install the must-have pre-requisites',JSON.stringify(listrequiredpackage));
+			}
 			spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env });
 		}
 	}else if (process.platform === 'win32'){
 		spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env });
+		
 	}else{
 		console.log(`Platform ${process.platform} not supported.`)
 	}
@@ -373,4 +547,4 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge") != -1){
 
 console.log('WIFIDrop https://wifidrop.js.org')
 
-process.exit()
+//process.exit()
