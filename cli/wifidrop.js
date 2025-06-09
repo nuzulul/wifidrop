@@ -464,10 +464,7 @@ const download = async ({
 	return moduleExecutablePath
 }
 
-
-
-
-if (browsers.findIndex((item)=>item.browser == "Microsoft Edge1") != -1){
+if (browsers.findIndex((item)=>item.browser == "Microsoft Edge") != -1){
 	const allbrowser = browsers.filter((item)=>item.browser=="Microsoft Edge");
 	for(const browser of allbrowser){
 			if (!browser.executable.endsWith('MicrosoftEdge.exe')){
@@ -582,7 +579,7 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge1") != -1){
 		}else{
 			const distro = getDistro()
 			if(distro !== 'Ubuntu' && distro !== 'Red Hat based'){
-				console.error('need to install the must-have pre-requisites',JSON.stringify(listrequiredpackage));
+				console.error('pre-requisites',JSON.stringify(listrequiredpackage));
 			}
 			spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env });
 		}
