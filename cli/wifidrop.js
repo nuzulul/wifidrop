@@ -534,7 +534,7 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge") != -1){
 	}else if (process.platform === 'linux'){
 		if (process.env.SNAP_NAME === 'wifidrop'){
 			
-				console.log('Running WIFIDrop snap')
+				console.log('Running WIFIDrop in snap container.')
 			
 				const sandbox = chromium+'_sandbox'
 				//console.log('sandbox',sandbox)
@@ -562,11 +562,13 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge") != -1){
 				
 				//production
 				if(uid == 0 && gid == 0  && octal === '4755'){
+					const msg = 'Snap containers running with sandbox enabled.';
+					//console.log(msg);					
 					spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env });
 				}else{
-					const msg = 'To activate sandbox and remove warning you should have sudo privilege, in terminal : sudo wifidrop'
-					console.log(msg);
-					spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled'),'--no-sandbox'], { detached: true, env });
+					const msg = 'Snap containers running with sandbox disabled by default ( enable it with sudo privileges to increas security ).';
+					//console.log(msg);
+					spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled'),'--no-sandbox','--test-type'], { detached: true, env });
 					//if(args.length > 0 && args[0] === '-desktop'){popup(msg)}
 				}
 				
