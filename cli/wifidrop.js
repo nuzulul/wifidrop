@@ -59,7 +59,7 @@ async function openChromiumBrowser(browser,address){
 
 function getAppDataDir(appName) {
   let appDataDir;
-  const publisher = 'naroilstudio';
+  const publisher = 'narojilstudio';
   if (process.platform === 'win32') {
     appDataDir = (process.env.LOCALAPPDATA && path.join(process.env.LOCALAPPDATA, publisher)) || path.join(os.homedir(), 'AppData', 'Local', publisher) ;
   } else if (process.platform === 'darwin') {

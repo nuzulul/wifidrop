@@ -49,9 +49,9 @@ Windows : [https://apps.microsoft.com/detail/9MVN98K4BBWC](https://apps.microsof
 
 Linux : [https://snapcraft.io/wifidrop](https://snapcraft.io/wifidrop)
 
-Self-hosted : [https://github.com/nuzulul/wifidrop](https://github.com/nuzulul/wifidrop)
-
 NPM : [https://www.npmjs.com/package/wifidrop](https://www.npmjs.com/package/wifidrop) - `npm install -g wifidrop`
+
+Self-hosted : [https://github.com/nuzulul/wifidrop](https://github.com/nuzulul/wifidrop)
 
 ## License
 
