@@ -43,7 +43,8 @@
 	"snapcraft": "docker run --rm -it --privileged -v %cd%:/data -w /data diddledani/snapcraft:core22",
 	"snapcraft-clean": "docker run --rm -it --privileged -v %cd%:/data -w /data diddledani/snapcraft:core22 snapcraft clean",
 	"gh-temp-first": "git checkout -b branch_saved && git add . && git commit -m \"saved\" && git checkout --orphan branch_temp && git commit -m \"temp\" && git push --set-upstream origin branch_temp && git checkout main && git branch -D branch_temp && git merge branch_saved && git branch -D branch_saved && git reset --soft HEAD~1 && git restore --staged .",
-	"gh-temp": "git push origin :branch_temp && npm run gh-temp-first"
+	"gh-temp": "git push origin :branch_temp && npm run gh-temp-first",
+	"build-exe": "call \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\Roslyn\\csc.exe\" /target:winexe /win32icon:src/public/icon-512.ico ./tools/launcher/wifidrop-win.cs && move wifidrop-win.exe ./tools/launcher/"
   },
   "repository": {
     "type": "git",

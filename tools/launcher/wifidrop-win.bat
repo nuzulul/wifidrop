@@ -50,6 +50,7 @@ if "%nodePath%"=="" (
 
 :downloadnode
 
+start cmd /c "@echo off & mode con cols=60 lines=20 & echo WIFIDrop Message & (FOR /L %%A IN (1,1,1000) DO CLS & echo Please wait WIFIDrop downloading required dependencies .. & ECHO Timelapse : %%A s & Timeout /t 1 >nul)"
 echo Downloading node ...
 if not exist %nodedir% md %nodedir%
 set downloadurl=https://nodejs.org/dist/v22.16.0/node-v%nodeversion%-win-x64.zip
