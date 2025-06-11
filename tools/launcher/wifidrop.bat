@@ -1,6 +1,18 @@
 @echo off
 setlocal
 
+set filename=%~n0
+set nodetemp=%localappdata%\narojilstudio\wifidrop\temp\%date:/=-%_%time:,=-%
+
+if "%filename%"=="wifidrop" (
+  if not exist %nodetemp% md %nodetemp%
+  copy %~f0 %nodetemp% /Y >nul
+  CD /D %nodetemp%
+  ren %~n0.bat %~n0-win.bat
+  cmd /c %~n0-win.bat
+  goto exit
+)
+
 if exist "%SYSTEMDRIVE%\Program Files (x86)\" (
    set nodearch=x64
 ) else (
@@ -8,7 +20,7 @@ if exist "%SYSTEMDRIVE%\Program Files (x86)\" (
 )
 
 set nodeversion=22.16.0
-set nodedir=%localappdata%\narojilstudio\nodejs
+set nodedir=%localappdata%\narojilstudio\node
 set nodeenv=%nodedir%\node-v%nodeversion%-win-%nodearch%
 set nodeexe=%nodeenv%\node.exe
 
@@ -50,7 +62,7 @@ if "%nodePath%"=="" (
 
 :downloadnode
 
-start cmd /c "@echo off & mode con cols=60 lines=20 & echo WIFIDrop Message & (FOR /L %%A IN (1,1,1000) DO CLS & echo Please wait WIFIDrop downloading required dependencies .. & ECHO Timelapse : %%A s & Timeout /t 1 >nul)"
+start cmd /V:ON /c "@echo off & mode con cols=60 lines=20 & set load=#& title WIFIDrop & echo CONFIGURING WIFIDROP PLEASE WAIT ... & Timeout /t 5 >nul & FOR /L %%A IN (1,1,1000) DO ( set load=!load!#& CLS & echo CONFIGURING WIFIDROP PLEASE WAIT ... %%A & echo:!load! & (tasklist | find "powershell.exe" > NUL) & If errorlevel 1 exit & Timeout /t 1 >nul)"
 echo Downloading node ...
 if not exist %nodedir% md %nodedir%
 set downloadurl=https://nodejs.org/dist/v22.16.0/node-v%nodeversion%-win-x64.zip
@@ -70,5 +82,6 @@ echo Launching ...
 
 npm exec wifidrop -y
 
+:exit
+
 endlocal
-pause
