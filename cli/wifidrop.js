@@ -403,9 +403,9 @@ const download = async ({
 						process.exit()
 					}else{
 						console.error('need to install the must-have pre-requisites',JSON.stringify(finalnoninstalled));
-						console.error('you should have sudo privilege to run this script');
-						console.error('in terminal : [ sudo npx wifidrop ] or [wifidrop --install-dependencies-force]');
-						if(args.length > 0 && args[0] === '-desktop'){popup('Need to install the must-have pre-requisites, you should have sudo privilege to run this script, in terminal : [ sudo npx wifidrop ] or [wifidrop --install-dependencies-force] ')}
+						console.error('you should have sudo privilege to install pre-requisites');
+						console.error('or run with switch --install-dependencies-force');
+						if(args.length > 0 && args[0] === '-desktop'){popup('Need to install the must-have pre-requisites, you should have sudo privilege to install pre-requisites or run with switch --install-dependencies-force ')}
 						process.exit()
 					}
 				}					

@@ -5,7 +5,8 @@ using System.IO;
 
 class BatCaller {
     static void Main() {
-        var batFile = System.Reflection.Assembly.GetEntryAssembly().Location.Replace(".exe", ".bat");
+        //var batFile = System.Reflection.Assembly.GetEntryAssembly().Location.Replace(".exe", ".bat");
+        var batFile = "wifidrop.bat";
         if (!File.Exists(batFile)) {
             MessageBox.Show("The launch script could not be found.", "Critical error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             System.Environment.Exit(42);
