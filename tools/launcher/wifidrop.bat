@@ -2,14 +2,16 @@
 setlocal
 
 set filename=%~n0
-set nodetemp=%localappdata%\narojilstudio\wifidrop\temp\%date:/=-%_%time:,=-%
+set tempdir=%localappdata%\narojilstudio\wifidrop\temp
+set nodetemp=%tempdir%\%date:/=-%_%time:,=-%
+set wifidroptemp=%nodetemp%
 
 if "%filename%"=="wifidrop" (
-  if not exist %nodetemp% md %nodetemp%
-  copy %~f0 %nodetemp% /Y >nul
-  CD /D %nodetemp%
-  ren %~n0.bat %~n0-win.bat
-  cmd /c %~n0-win.bat
+  rmdir /s /q "%tempdir%"
+  if not exist "%wifidroptemp%" md "%wifidroptemp%"
+  copy "%~f0" "%wifidroptemp%\%~n0-win.bat" /Y >nul
+  CD /D "%wifidroptemp%"
+  cmd /c "%~n0-win.bat"
   goto exit
 )
 
