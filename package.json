@@ -1,6 +1,6 @@
 {
   "name": "wifidrop",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Local peer-to-peer file transfer via WIFI",
   "main": "cli/wifidrop.js",
   "bin": "./cli/wifidrop.js",

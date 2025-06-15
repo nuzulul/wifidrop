@@ -5,11 +5,12 @@ set installdir=%localappdata%\narojilstudio\wifidrop\launcher
 set startmenudir=%appdata%\Microsoft\Windows\Start Menu\Programs\WIFIDrop
 
 if "%1"=="--install" (
-	echo Install WIFIDrop ...
+	echo Preparing WIFIDrop ...
 	if not exist "%installdir%" md "%installdir%"
 	copy "%~f0" "%installdir%\wifidrop.bat" /Y >nul
 	copy "%~dp0\wifidrop.ico" "%installdir%\wifidrop.ico" /Y >nul
-	powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('WIFIDrop.lnk');$s.TargetPath='cmd.exe';$s.Arguments='/c wifidrop.bat';$s.IconLocation='%installdir%\wifidrop.ico';$s.WorkingDirectory='%installdir%';$s.WindowStyle=7;$s.Save()"
+	copy "%~dp0\README.md" "%installdir%\README.md" /Y >nul
+	powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('WIFIDrop.lnk');$s.TargetPath='powershell.exe';$s.Arguments='\""$s=(New-Object -COM WScript.Shell).Run(\\\"wifidrop.bat\\\",0)\""';$s.IconLocation='%installdir%\wifidrop.ico';$s.WorkingDirectory='%installdir%';$s.WindowStyle=7;$s.Save()"
 	if not exist "%startmenudir%" md "%startmenudir%"
 	copy "%~dp0\WIFIDrop.lnk" "%installdir%\WIFIDrop.lnk" /Y >nul
 	copy "%~dp0\WIFIDrop.lnk" "%startmenudir%\WIFIDrop.lnk" /Y >nul
@@ -18,7 +19,8 @@ if "%1"=="--install" (
 	copy "%~dp0\Uninstall-WIFIDrop.lnk" "%startmenudir%\Uninstall-WIFIDrop.lnk" /Y >nul
 	copy "%~dp0\Uninstall-WIFIDrop.lnk" "%installdir%\Uninstall-WIFIDrop.lnk" /Y >nul
 	CD /D "%installdir%"
-	cmd /c "%~n0.bat"
+	rem cmd /c "%~n0.bat"
+	powershell "$s=(New-Object -COM WScript.Shell).Run(\"wifidrop.bat\",0)"
 	goto exit
 )
 

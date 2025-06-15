@@ -26,14 +26,18 @@ DisplayLicense=
 FinishMessage=
 TargetName=wifidrop.exe
 FriendlyName=WIFIDrop
-AppLaunched=cmd /c "wifidrop.bat --install"
+AppLaunched=cmd /c "@echo off & mode con cols=60 lines=20 & title WIFIDrop & wifidrop.bat --install"
 PostInstallCmd=<None>
-AdminQuietInstCmd=
-UserQuietInstCmd=
+AdminQuietInstCmd=cmd /c "@echo off & mode con cols=60 lines=20 & title WIFIDrop & wifidrop.bat --install"
+UserQuietInstCmd=cmd /c "@echo off & mode con cols=60 lines=20 & title WIFIDrop & wifidrop.bat --install"
 FILE0="wifidrop.bat"
 FILE1="wifidrop.ico"
+FILE2="README.md"
 [SourceFiles]
 SourceFiles0=.\
+SourceFiles1=.\..\..\
 [SourceFiles0]
 %FILE0%=
 %FILE1%=
+[SourceFiles1]
+%FILE2%=
