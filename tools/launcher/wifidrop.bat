@@ -1,6 +1,35 @@
 @echo off
 setlocal
 
+set installdir=%localappdata%\narojilstudio\wifidrop\launcher
+set startmenudir=%appdata%\Microsoft\Windows\Start Menu\Programs\WIFIDrop
+
+if "%1"=="--install" (
+	echo Install WIFIDrop ...
+	if not exist "%installdir%" md "%installdir%"
+	copy "%~f0" "%installdir%\wifidrop.bat" /Y >nul
+	copy "%~dp0\wifidrop.ico" "%installdir%\wifidrop.ico" /Y >nul
+	powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('WIFIDrop.lnk');$s.TargetPath='cmd.exe';$s.Arguments='/c wifidrop.bat';$s.IconLocation='%installdir%\wifidrop.ico';$s.WorkingDirectory='%installdir%';$s.WindowStyle=7;$s.Save()"
+	if not exist "%startmenudir%" md "%startmenudir%"
+	copy "%~dp0\WIFIDrop.lnk" "%installdir%\WIFIDrop.lnk" /Y >nul
+	copy "%~dp0\WIFIDrop.lnk" "%startmenudir%\WIFIDrop.lnk" /Y >nul
+	copy "%~dp0\WIFIDrop.lnk" "%userprofile%\desktop\WIFIDrop.lnk" /Y >nul
+	powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('Uninstall-WIFIDrop.lnk');$s.TargetPath='cmd.exe';$s.Arguments='/c wifidrop.bat --uninstall';$s.IconLocation='%installdir%\wifidrop.ico';$s.WorkingDirectory='%installdir%';$s.WindowStyle=7;$s.Save()"
+	copy "%~dp0\Uninstall-WIFIDrop.lnk" "%startmenudir%\Uninstall-WIFIDrop.lnk" /Y >nul
+	copy "%~dp0\Uninstall-WIFIDrop.lnk" "%installdir%\Uninstall-WIFIDrop.lnk" /Y >nul
+	CD /D "%installdir%"
+	cmd /c "%~n0.bat"
+	goto exit
+)
+
+if "%1"=="--uninstall" (
+	echo Uninstall WIFIDrop ...
+	rmdir /s /q "%startmenudir%"
+	del /F /S /Q "%userprofile%\desktop\WIFIDrop.lnk"
+	rmdir /s /q "%installdir%"
+	goto exit
+)
+
 set filename=%~n0
 set tempdir=%localappdata%\narojilstudio\wifidrop\temp
 set nodetemp=%tempdir%\%date:/=-%_%time:,=-%
@@ -14,6 +43,9 @@ if "%filename%"=="wifidrop" (
   cmd /c "%~n0-win.bat"
   goto exit
 )
+
+set version=0.0.8
+echo WIFIDrop %version%
 
 if exist "%SYSTEMDRIVE%\Program Files (x86)\" (
    set nodearch=x64
