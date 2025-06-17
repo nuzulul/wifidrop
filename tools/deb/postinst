@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# symbolic link
+sudo ln -s /usr/share/wifidrop/tools/launcher/wifidrop.sh /usr/bin/wifidrop
+
+# the project
+cd /usr/share
+git clone https://github.com/nuzulul/wifidrop.git
+
+# permissions
+chmod -R 777 /usr/share/wifidrop
+
+# message
+echo "wifidrop has been installed successfully!"
+echo "run it by typing 'wifidrop' in the terminal."

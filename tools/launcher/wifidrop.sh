@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Function to install NVM
 install_nvm() {
@@ -33,4 +33,4 @@ then
   npm -v
 fi
 
-npm exec -- wifidrop "$@"
+npm -y exec -- wifidrop "$@"

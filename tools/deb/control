@@ -1,0 +1,8 @@
+Package: wifidrop
+Version: 0.0.1
+Section: utils
+Priority: optional
+Architecture: all
+Depends: bash
+Maintainer: Nuzulul Zulkarnain <nuzulul.github.io>
+Description: Local peer-to-peer file transfer via WIFI

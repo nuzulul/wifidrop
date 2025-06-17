@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# remove everything
+sudo rm -rf /usr/bin/wifidrop
+sudo rm -rf /usr/share/wifidrop
