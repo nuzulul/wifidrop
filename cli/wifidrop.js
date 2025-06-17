@@ -24,7 +24,11 @@ let chromiumRevision = path.join(chromiumPath, 'revision')
 const address = 'https://wifidrop.js.org'
 const userdata = getAppDataDir('wifidrop')
 const args = process.argv.slice(2);
-const listrequiredpackage = ['ca-certificates','fonts-liberation','libappindicator3-1','libasound2t64','libatk-bridge2.0-0','libatk1.0-0','libc6','libcairo2','libcups2','libdbus-1-3','libexpat1','libfontconfig1','libgbm1','libgcc1','libglib2.0-0','libgtk-3-0','libnspr4','libnss3','libpango-1.0-0','libpangocairo-1.0-0','libstdc++6','libx11-6','libx11-xcb1','libxcb1','libxcomposite1','libxcursor1','libxdamage1','libxext6','libxfixes3','libxi6','libxrandr2','libxrender1','libxss1','libxtst6','lsb-release','wget','xdg-utils']
+let listrequiredpackage = ['ca-certificates','fonts-liberation','libappindicator3-1','libasound2','libatk-bridge2.0-0','libatk1.0-0','libc6','libcairo2','libcups2','libdbus-1-3','libexpat1','libfontconfig1','libgbm1','libgcc1','libglib2.0-0','libgtk-3-0','libnspr4','libnss3','libpango-1.0-0','libpangocairo-1.0-0','libstdc++6','libx11-6','libx11-xcb1','libxcb1','libxcomposite1','libxcursor1','libxdamage1','libxext6','libxfixes3','libxi6','libxrandr2','libxrender1','libxss1','libxtst6','lsb-release','wget','xdg-utils']
+
+if(args.length > 0 && args[0] === '--debug'){
+	console.log('Mode : debug')
+}
 
 if (process.platform === 'linux' && process.env.SNAP_NAME === 'wifidrop'){
 	chromiumPath = process.env.SNAP_REAL_HOME+'/Public/narojilstudio/chromium'
@@ -51,9 +55,17 @@ if (process.platform === 'linux' && process.env.SNAP_NAME === 'wifidrop'){
 
 async function openChromiumBrowser(browser,address){
 	if (process.platform === 'darwin') {
-		spawn('open', ['-a',browser.browser,'--app='+address,'--new-window','--user-data-dir='+path.join(userdata,browser.browser)], { detached: true, env: process.env });
+		if(args.length > 0 && args[0] === '--debug'){
+			spawnSync('open', ['-a',browser.browser,'--app='+address,'--new-window','--user-data-dir='+path.join(userdata,browser.browser)], {stdio: 'inherit', detached: true, env: process.env });
+		}else{
+			spawn('open', ['-a',browser.browser,'--app='+address,'--new-window','--user-data-dir='+path.join(userdata,browser.browser)], { detached: true, env: process.env });
+		}
 	}else{
-		spawn(browser.executable, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,browser.browser)], { detached: true, env: process.env });
+		if(args.length > 0 && args[0] === '--debug'){
+			spawnSync(browser.executable, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,browser.browser)], {stdio: 'inherit', detached: true, env: process.env });
+		}else{
+			spawn(browser.executable, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,browser.browser)], { detached: true, env: process.env });
+		}
 	}
 }
 
@@ -319,24 +331,8 @@ function isPackageInstalled(packageName) {
  });
 }
 
-const download = async ({
-  platform: platform = currentPlatform,
-  revision: revision = '591479',
-  installPath: installPath = chromiumPath
-} = {}) =>{
-	const moduleExecutablePath = getExecutablePath(
-	installPath,
-	platform,
-	revision
-	)
-
-	try {
-		await stat(moduleExecutablePath)
-		return moduleExecutablePath
-	} catch (_) {}  
-	
-	if (process.platform === 'linux' && process.env.SNAP_NAME !== 'wifidrop'){
-		
+const linuxdependenciescheck = async ()=>{
+		if (process.platform === 'linux' && process.env.SNAP_NAME !== 'wifidrop' && args[0] !== '--debug'){
 		
 		console.log('check pre-requisites');
 		
@@ -344,7 +340,31 @@ const download = async ({
 		
 		if(distro == 'Ubuntu'){
 			
-			if(args.length > 0 && args[0] === '--install-dependencies-force'){
+			try{
+				const osRelease = fs.readFileSync('/etc/os-release', 'utf-8');
+				const lines = osRelease.split('\n');
+				let ubuntuversion = '';
+				for (const line of lines) {
+				  if (line.startsWith('VERSION_ID=')) {
+					ubuntuversion = line.substring(11).replace(/"/g, '');
+					break;
+				  }
+				}
+
+				ubuntuversion = parseInt(ubuntuversion)
+				
+				if(ubuntuversion >= 24){
+					var index = listrequiredpackage.indexOf('libasound2');
+
+					if (index !== -1) {
+						listrequiredpackage[index] = 'libasound2t64';
+					}			
+				}				
+			}catch(error){
+				console.log('Could not determine ubuntu version');
+			}
+			
+			if(args.length > 0 && args[0] === '--force-install-dependencies'){
 		
 				const apt = ['apt-get','install','-y'];
 				const install = apt.concat(listrequiredpackage);
@@ -403,9 +423,9 @@ const download = async ({
 						process.exit()
 					}else{
 						console.error('need to install the must-have pre-requisites',JSON.stringify(finalnoninstalled));
-						console.error('you should have sudo privilege to install pre-requisites');
-						console.error('or run with switch --install-dependencies-force');
-						if(args.length > 0 && args[0] === '-desktop'){popup('Need to install the must-have pre-requisites, you should have sudo privilege to install pre-requisites or run with switch --install-dependencies-force ')}
+						console.error('you should have sudo privilege to install pre-requisites automatically');
+						console.error('or run with switch --force-install-dependencies');
+						if(args.length > 0 && args[0] === '-desktop'){popup('Need to install the must-have pre-requisites '+JSON.stringify(listrequiredpackage)+', you should have sudo privilege to install pre-requisites automatically or run with switch --force-install-dependencies ')}
 						process.exit()
 					}
 				}					
@@ -425,6 +445,25 @@ const download = async ({
 			process.exit()
 		}
 	}
+}
+
+const download = async ({
+  platform: platform = currentPlatform,
+  revision: revision = '591479',
+  installPath: installPath = chromiumPath
+} = {}) =>{
+	const moduleExecutablePath = getExecutablePath(
+	installPath,
+	platform,
+	revision
+	)
+	
+	await linuxdependenciescheck()
+
+	try {
+		await stat(moduleExecutablePath)
+		return moduleExecutablePath
+	} catch (_) {}  
 
 	let url = downloadURL(platform, revision)
 
@@ -530,7 +569,11 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge") != -1){
 	env.GOOGLE_DEFAULT_CLIENT_SECRET = "no"
 	
 	if (process.platform === 'darwin') {
-		spawn('open', [chromium,'--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env});
+		if(args.length > 0 && args[0] === '--debug'){
+			spawnSync('open', [chromium,'--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], {stdio: 'inherit', detached: true, env});
+		}else{
+			spawn('open', [chromium,'--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env});
+		}
 	}else if (process.platform === 'linux'){
 		if (process.env.SNAP_NAME === 'wifidrop'){
 			
@@ -563,30 +606,42 @@ if (browsers.findIndex((item)=>item.browser == "Microsoft Edge") != -1){
 				//production
 				if(uid == 0 && gid == 0  && octal === '4755'){
 					const msg = 'Snap containers running with sandbox enabled.';
-					//console.log(msg);					
-					spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env });
+					//console.log(msg);	
+					if(args.length > 0 && args[0] === '--debug'){
+						spawnSync(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], {stdio: 'inherit', detached: true, env });
+					}else{
+						spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], {  detached: true, env });
+					}
 				}else{
-					const msg = 'Snap containers running with sandbox disabled by default ( enable it with sudo privileges to increas security ).';
+					const msg = 'Snap containers running with sandbox disabled by default ( enable it with sudo privileges ).';
 					//console.log(msg);
-					spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled'),'--no-sandbox','--test-type'], { detached: true, env });
+					if(args.length > 0 && args[0] === '--debug'){
+						spawnSync(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled'),'--no-sandbox','--test-type'], {stdio: 'inherit',  detached: true, env });
+					}else{
+						spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled'),'--no-sandbox','--test-type'], { detached: true, env });
+					}
 					//if(args.length > 0 && args[0] === '-desktop'){popup(msg)}
 				}
-				
-				//debug
-				//spawnSync(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], {stdio: 'inherit', detached: true, env });
-			
-				//debug nosandbox
-				//spawnSync(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled'),'--no-sandbox'], {stdio: 'inherit', detached: true, env });
 			
 		}else{
 			const distro = getDistro()
 			if(distro !== 'Ubuntu' && distro !== 'Red Hat based'){
-				console.error('pre-requisites',JSON.stringify(listrequiredpackage));
+				console.error('need pre-requisites',JSON.stringify(listrequiredpackage));
 			}
-			spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env });
+			
+			if(args.length > 0 && args[0] === '--debug'){
+				spawnSync(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], {stdio: 'inherit', detached: true, env });
+			}else{
+				spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env });
+			}
+			
 		}
 	}else if (process.platform === 'win32'){
-		spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env });
+		if(args.length > 0 && args[0] === '--debug'){
+			spawnSync(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], {stdio: 'inherit', detached: true, env });
+		}else{
+			spawn(chromium, ['--app='+address,'--new-window','--user-data-dir='+path.join(userdata,'Chromium Bundled')], { detached: true, env });
+		}
 		
 	}else{
 		console.log(`Platform ${process.platform} not supported.`)

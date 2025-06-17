@@ -39,7 +39,7 @@ npm run build
 
 A new build of WIFIDrop PWA will now be available in the `/dist` directory that you can self-hosted on static hosting.
 
-## Platforms
+## Install
 
 Online : [https://wifidrop.js.org](https://wifidrop.js.org)
 
@@ -52,6 +52,8 @@ Linux : [https://snapcraft.io/wifidrop](https://snapcraft.io/wifidrop)
 NPM : [https://www.npmjs.com/package/wifidrop](https://www.npmjs.com/package/wifidrop) - `npm install -g wifidrop`
 
 Self-hosted : [https://github.com/nuzulul/wifidrop](https://github.com/nuzulul/wifidrop)
+
+Releases : [https://github.com/nuzulul/wifidrop/releases](https://github.com/nuzulul/wifidrop/releases)
 
 ## License
 
