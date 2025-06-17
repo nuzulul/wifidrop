@@ -7,6 +7,9 @@ sudo ln -s /usr/share/wifidrop/tools/launcher/wifidrop.sh /usr/bin/wifidrop
 cd /usr/share
 git clone https://github.com/nuzulul/wifidrop.git
 
+# desktop
+cp -f /usr/share/wifidrop/tools/launcher/wifidrop.desktop /usr/share/applications
+
 # permissions
 chmod -R 777 /usr/share/wifidrop
 

@@ -46,8 +46,9 @@
 	"gh-temp": "git push origin :branch_temp && npm run gh-temp-first",
 	"build-exe": "csc /target:winexe /win32icon:src/public/icon-512.ico ./tools/launcher/wifidrop.cs && move wifidrop.exe ./tools/launcher/ & cd ..\\..",
 	"build-win-installer": "node -p \"require('./package.json').version\">tools\\launcher\\wifidrop.txt & cd tools\\launcher && iexpress /N wifidrop.sed",
-	"build-win-deb": "wpkg -b tools\\deb",
-	"build-win": "npm run removedir dist & md dist & node -p \"require('./package.json').version\">dist\\version & set /p myversion=<dist\\version & CALL echo %myversion% & npm run build-win-installer & CALL move tools\\launcher\\wifidrop.exe dist\\wifidrop-%myversion%-windows.exe & cd dist & CALL tar.exe -a -cf wifidrop-%myversion%-windows.zip wifidrop-%myversion%-windows.exe"
+	"deb-update-version": "node -p \"require('./package.json').version\">tools\\deb\\data\\wifidrop & set /p myversion=<tools\\deb\\data\\wifidrop & CALL tools\\util\\editversion.bat %myversion% 2 tools\\deb\\control",
+	"build-win-deb": "npm run deb-update-version & wpkg -b tools\\deb",
+	"build-win": "npm run removedir dist & md dist & node -p \"require('./package.json').version\">dist\\version & set /p myversion=<dist\\version & CALL echo %myversion% & npm run build-win-installer & CALL move tools\\launcher\\wifidrop.exe dist\\wifidrop-%myversion%-windows.exe & cd dist & CALL tar.exe -a -cf wifidrop-%myversion%-windows.zip wifidrop-%myversion%-windows.exe & cd .. & npm run build-win-deb & CALL move tools\\deb\\wifidrop.deb dist\\wifidrop-%myversion%-linux.deb"
   },
   "repository": {
     "type": "git",
