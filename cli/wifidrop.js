@@ -425,7 +425,7 @@ const linuxdependenciescheck = async ()=>{
 						console.error('need to install the must-have pre-requisites',JSON.stringify(finalnoninstalled));
 						console.error('you should have sudo privilege to install pre-requisites automatically');
 						console.error('or run with switch --force-install-dependencies');
-						if(args.length > 0 && args[0] === '-desktop'){popup('Need to install the must-have pre-requisites '+JSON.stringify(listrequiredpackage)+', you should have sudo privilege to install pre-requisites automatically or run with switch --force-install-dependencies ')}
+						if(args.length > 0 && args[0] === '-desktop'){popup('Need to install the must-have pre-requisites '+JSON.stringify(finalnoninstalled)+', you should have sudo privilege to install pre-requisites automatically or run with switch --force-install-dependencies ')}
 						process.exit()
 					}
 				}					
