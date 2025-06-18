@@ -1,6 +1,8 @@
 @echo off
 setlocal
 
+title WIFIDrop
+
 where powershell.exe >nul 2>&1
 
 if %errorlevel% equ 0 (

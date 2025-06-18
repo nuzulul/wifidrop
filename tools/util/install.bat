@@ -1,6 +1,8 @@
 @echo off
 setlocal ENABLEDELAYEDEXPANSION
 
+title WIFIDrop
+
 where powershell.exe >nul 2>&1
 
 if %errorlevel% equ 0 (
@@ -29,7 +31,11 @@ if "%1"=="/main" (
 			if "%1"=="/u" (
 				powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --uninstall\",0)"
 			) else (
-				powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main %*\",0)"
+				if "%1"=="--debug" (
+					cmd /c "install.bat /main --debug"
+				) else (
+					powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main %*\",0)"
+				)
 			)
 		)		
 	)
