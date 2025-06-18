@@ -33,4 +33,4 @@ then
   npm -v
 fi
 
-npm -y exec -- wifidrop "$@"
+npm -y exec --package=wifidrop@latest -- wifidrop "$@"

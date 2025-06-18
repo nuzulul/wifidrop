@@ -24,7 +24,11 @@ if "%1"=="--install" (
 	copy "%~dp0\Uninstall-WIFIDrop.lnk" "%installdir%\Uninstall-WIFIDrop.lnk" /Y >nul
 	if "%2"=="--launch" (
 		CD /D "%installdir%"
-		powershell "$s=(New-Object -COM WScript.Shell).Run(\"wifidrop.bat\",0)"
+		if "%3"=="--debug" (
+			cmd /c "%wifidrop.bat --debug"
+		) else (
+			powershell "$s=(New-Object -COM WScript.Shell).Run(\"wifidrop.bat\",0)"
+		)
 	)
 	goto exit
 )
@@ -47,7 +51,7 @@ if "%filename%"=="wifidrop" (
   if not exist "%wifidroptemp%" md "%wifidroptemp%"
   copy "%~f0" "%wifidroptemp%\%~n0-win.bat" /Y >nul
   CD /D "%wifidroptemp%"
-  cmd /c "%~n0-win.bat"
+  cmd /c "%~n0-win.bat %1"
   goto exit
 )
 
@@ -119,7 +123,7 @@ echo Path updated for current session.
 start cmd /V:ON /c "@echo off & mode con cols=60 lines=20 & set load=#& title WIFIDrop & echo LOADING WIFIDROP PLEASE WAIT ... & FOR /L %%A IN (1,1,3) DO ( set load=!load!#& CLS & echo LOADING WIFIDROP PLEASE WAIT ... %%A & echo:!load! & Timeout /t 1 >nul)"
 echo Launching ...
 
-npm exec wifidrop -y
+npm -y exec --package=wifidrop@latest -- wifidrop %1
 
 :exit
 
