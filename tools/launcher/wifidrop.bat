@@ -1,6 +1,16 @@
 @echo off
 setlocal
 
+where powershell.exe >nul 2>&1
+
+if %errorlevel% equ 0 (
+    echo PowerShell exists on this system.
+) else (
+    echo PowerShell does not exist on this system or is not in the system's PATH.
+	pause
+	goto exit
+)
+
 set installdir=%localappdata%\narojilstudio\wifidrop\launcher
 set startmenudir=%appdata%\Microsoft\Windows\Start Menu\Programs\WIFIDrop
 
@@ -25,7 +35,7 @@ if "%1"=="--install" (
 	if "%2"=="--launch" (
 		CD /D "%installdir%"
 		if "%3"=="--debug" (
-			cmd /c "%wifidrop.bat --debug"
+			cmd /c "wifidrop.bat --debug"
 		) else (
 			powershell "$s=(New-Object -COM WScript.Shell).Run(\"wifidrop.bat\",0)"
 		)
@@ -37,6 +47,7 @@ if "%1"=="--uninstall" (
 	echo Uninstall WIFIDrop ...
 	rmdir /s /q "%startmenudir%"
 	del /F /S /Q "%userprofile%\desktop\WIFIDrop.lnk"
+	del /F /S /Q "%localappdata%\Microsoft\WindowsApps\wifidrop.bat"
 	rmdir /s /q "%installdir%"
 	goto exit
 )
@@ -110,7 +121,7 @@ if not exist %nodedir% md %nodedir%
 set downloadurl=https://nodejs.org/dist/v22.16.0/node-v%nodeversion%-win-x64.zip
 set downloadpath=%nodedir%\node.zip
 set directory=%nodedir%\
-%WINDIR%\System32\WindowsPowerShell\v1.0\powershell.exe -Command "& {Import-Module BitsTransfer;Start-BitsTransfer '%downloadurl%' '%downloadpath%';$shell = new-object -com shell.application;$zip = $shell.NameSpace('%downloadpath%');foreach($item in $zip.items()){$shell.Namespace('%directory%').copyhere($item);};remove-item '%downloadpath%';}"
+powershell -Command "& {Import-Module BitsTransfer;Start-BitsTransfer '%downloadurl%' '%downloadpath%';$shell = new-object -com shell.application;$zip = $shell.NameSpace('%downloadpath%');foreach($item in $zip.items()){$shell.Namespace('%directory%').copyhere($item);};remove-item '%downloadpath%';}"
 echo download complete and extracted to the directory.
 
 :updatepath
