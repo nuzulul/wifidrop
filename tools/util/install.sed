@@ -28,8 +28,8 @@ TargetName=wifidrop.exe
 FriendlyName=WIFIDrop
 AppLaunched=cmd /c "@echo off & mode con cols=60 lines=20 & title WIFIDrop & install.bat"
 PostInstallCmd=<None>
-AdminQuietInstCmd=cmd /c "@echo off & mode con cols=60 lines=20 & title WIFIDrop & install.bat --silent"
-UserQuietInstCmd=cmd /c "@echo off & mode con cols=60 lines=20 & title WIFIDrop & install.bat --silent"
+AdminQuietInstCmd=cmd /V:ON /c "@echo off & mode con cols=60 lines=20 & title WIFIDrop & install.bat /q"
+UserQuietInstCmd=cmd /V:ON /c "@echo off & mode con cols=60 lines=20 & title WIFIDrop & install.bat /q"
 FILE0="install.bat"
 [SourceFiles]
 SourceFiles0=.\

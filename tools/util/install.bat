@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal ENABLEDELAYEDEXPANSION
 
 where powershell.exe >nul 2>&1
 
@@ -11,11 +11,47 @@ if %errorlevel% equ 0 (
 	goto exit
 )
 
-if "%1"=="/q" (
+set/a timer=0
+set load=#
+
+if "%1"=="/main" (
+	echo Main program
+) else (
 	echo WIFIDrop
 	echo https://wifidrop.js.org
-	rem not working for now
-	powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat --silent\",1)"
+	echo Install WIFIDrop pre-requisites ...
+	if "%1"=="/q" (
+		powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --silent\",0)"
+	) else (
+		if "%1"=="/p" (
+			powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --silent-progressbar\",0)"
+		) else (
+			if "%1"=="/u" (
+				powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --uninstall\",0)"
+			) else (
+				powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main %*\",0)"
+			)
+		)		
+	)
+	
+	FOR /L %%A IN (1,1,1000) DO ( 
+		set load=!load!#
+		CLS
+		echo WIFIDrop
+		echo https://wifidrop.js.org		
+		echo Install WIFIDrop pre-requisites ... %%A
+		echo:!load!
+		(tasklist | find "powershell.exe" > NUL)
+		If errorlevel 1 (
+			set/a timer=!timer!+1
+			if !timer!==3 (
+				goto exit
+			)
+		) else (
+			set/a timer=0
+		)
+		Timeout /t 1 >nul
+	)
 	goto exit
 )
 
@@ -48,17 +84,17 @@ echo "%app%" %%*>>"%windowsappsdir%\wifidrop.bat"
 
 CD /D %tempdir%
 
-if "%1"=="--silent" (
+if "%2"=="--silent" (
 	cmd /c "wifidrop.bat --install --quiet"
 	goto exit
 )
 
-if "%1"=="/p" (
+if "%2"=="--silent-progressbar" (
 	cmd /c "wifidrop.bat --install --quiet"
 	goto exit
 )
 
-if "%1"=="/u" (
+if "%2"=="--uninstall" (
 	cmd /c "wifidrop.bat --uninstall"
 	goto exit
 )
