@@ -3,6 +3,8 @@ setlocal
 
 title WIFIDrop
 
+cd %~dp0
+
 where powershell.exe >nul 2>&1
 
 if %errorlevel% equ 0 (

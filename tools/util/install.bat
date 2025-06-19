@@ -3,6 +3,8 @@ setlocal ENABLEDELAYEDEXPANSION
 
 title WIFIDrop
 
+cd %~dp0
+
 where powershell.exe >nul 2>&1
 
 if %errorlevel% equ 0 (
@@ -22,23 +24,27 @@ if "%1"=="/main" (
 	echo WIFIDrop
 	echo https://wifidrop.js.org
 	echo Checking WIFIDrop prerequisites ...
-	cd %~dp0
+	
 	if "%1"=="/q" (
 		powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --silent\",0)"
 	) else (
-		if "%1"=="/n" (
-			powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --normal\",0)"
+		if "%1"=="/s" (
+			powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --super\",0)"
 		) else (
-			if "%1"=="/u" (
-				powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --uninstall\",0)"
+			if "%1"=="/n" (
+				powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --normal\",0)"
 			) else (
-				if "%1"=="--debug" (
-					cmd /c "install.bat /main --debug"
+				if "%1"=="/u" (
+					powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --uninstall\",0)"
 				) else (
-					powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main %*\",0)"
+					if "%1"=="--debug" (
+						cmd /c "install.bat /main --debug"
+					) else (
+						powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main %*\",0)"
+					)
 				)
-			)
-		)		
+			)	
+		)
 	)
 	
 	FOR /L %%A IN (1,1,1000) DO ( 
@@ -85,6 +91,11 @@ CD /D %tempdir%
 
 if "%2"=="--silent" (
 	cmd /c "wifidrop.bat --install --quiet"
+	goto installpath
+)
+
+if "%2"=="--super" (
+	cmd /c "wifidrop.bat --install --launch"
 	goto installpath
 )
 
