@@ -6,7 +6,7 @@ title WIFIDrop
 where powershell.exe >nul 2>&1
 
 if %errorlevel% equ 0 (
-    echo PowerShell exists on this system.
+    rem echo PowerShell exists on this system.
 ) else (
     echo PowerShell does not exist on this system or is not in the system's PATH.
 	pause

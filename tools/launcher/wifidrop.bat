@@ -6,7 +6,7 @@ title WIFIDrop
 where powershell.exe >nul 2>&1
 
 if %errorlevel% equ 0 (
-    echo PowerShell exists on this system.
+    rem echo PowerShell exists on this system.
 ) else (
     echo PowerShell does not exist on this system or is not in the system's PATH.
 	pause
@@ -51,6 +51,13 @@ if "%1"=="--uninstall" (
 	del /F /S /Q "%userprofile%\desktop\WIFIDrop.lnk"
 	del /F /S /Q "%localappdata%\Microsoft\WindowsApps\wifidrop.bat"
 	rmdir /s /q "%installdir%"
+	goto exit
+)
+
+set /p version=< wifidrop.txt
+if "%1"=="--version" (
+	echo Version : WIFIDrop BATCH Launcher %version%
+	echo https://wifidrop.js.org
 	goto exit
 )
 

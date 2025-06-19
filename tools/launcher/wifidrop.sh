@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+if [[ "$1" == "--version" ]]; then
+	version=$(<wifidrop.txt)
+	echo "Version : WIFIDrop BASH Launcher $version"
+	echo "https://wifidrop.js.org"
+	exit 1
+fi
+
 # Function to install NVM
 install_nvm() {
     echo "Installing NVM..."
@@ -31,7 +38,7 @@ if command -v node &> /dev/null
 then
   node -v
   npm -v
-  npm -y exec --package=wifidrop@latest -- wifidrop "$@"
+  npm -y exec --package=wifidrop@latest -- wifidrop $@
 else
   echo "Node.js is not installed."
   echo "Please install Node.js."
