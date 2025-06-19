@@ -59,5 +59,5 @@ cp -f "$CACHE_DIR/wifidrop/tools/launcher/wifidrop.desktop" "$HOME/.local/share/
 chmod -R 777 "$CACHE_DIR/wifidrop"
 
 # message
-echo "WIFIDrop has been installed successfully!
+echo "WIFIDrop has been installed successfully!"
 
