@@ -21,12 +21,12 @@ if "%1"=="/main" (
 ) else (
 	echo WIFIDrop
 	echo https://wifidrop.js.org
-	echo Install WIFIDrop pre-requisites ...
+	echo Checking WIFIDrop prerequisites ...
 	if "%1"=="/q" (
 		powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --silent\",0)"
 	) else (
-		if "%1"=="/p" (
-			powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --silent-progressbar\",0)"
+		if "%1"=="/n" (
+			powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --normal\",0)"
 		) else (
 			if "%1"=="/u" (
 				powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --uninstall\",0)"
@@ -45,7 +45,7 @@ if "%1"=="/main" (
 		CLS
 		echo WIFIDrop
 		echo https://wifidrop.js.org		
-		echo Install WIFIDrop pre-requisites ... %%A
+		echo Checking WIFIDrop prerequisites ... %%A
 		echo:!load!
 		(tasklist | find "powershell.exe" > NUL)
 		If errorlevel 1 (
@@ -61,7 +61,7 @@ if "%1"=="/main" (
 	goto exit
 )
 
-echo Install WIFIDrop pre-requisites ...
+echo Checking WIFIDrop prerequisites ...
 
 set tempdir=%temp%\%date:/=-%_%time:,=-%
 if not exist "%tempdir%" md "%tempdir%"
@@ -80,24 +80,16 @@ powershell -Command "& {Import-Module BitsTransfer;Start-BitsTransfer '%download
 powershell -Command "& {Import-Module BitsTransfer;Start-BitsTransfer '%downloadurl3%' '%downloadpath3%';}"
 powershell -Command "& {Import-Module BitsTransfer;Start-BitsTransfer '%downloadurl4%' '%downloadpath4%';}"
 
-set installdir=%localappdata%\narojilstudio\wifidrop\launcher
-set app=%installdir%\wifidrop.bat
-set windowsappsdir=%localappdata%\Microsoft\WindowsApps
-if not exist "%windowsappsdir%" md "%windowsappsdir%"
-
-echo @echo off>"%windowsappsdir%\wifidrop.bat"
-echo "%app%" %%*>>"%windowsappsdir%\wifidrop.bat"
-
 CD /D %tempdir%
 
 if "%2"=="--silent" (
 	cmd /c "wifidrop.bat --install --quiet"
-	goto exit
+	goto install
 )
 
-if "%2"=="--silent-progressbar" (
-	cmd /c "wifidrop.bat --install --quiet"
-	goto exit
+if "%2"=="--normal" (
+	cmd /c "wifidrop.bat --install --launch"
+	goto install
 )
 
 if "%2"=="--uninstall" (
@@ -106,6 +98,16 @@ if "%2"=="--uninstall" (
 )
 	
 cmd /c "wifidrop.bat --install --launch %*"
+goto exit
+
+:install
+
+set installdir=%localappdata%\narojilstudio\wifidrop\launcher
+set app=%installdir%\wifidrop.bat
+set windowsappsdir=%localappdata%\Microsoft\WindowsApps
+if not exist "%windowsappsdir%" md "%windowsappsdir%"
+echo @echo off>"%windowsappsdir%\wifidrop.bat"
+echo "%app%" %%*>>"%windowsappsdir%\wifidrop.bat"
 
 :exit
 

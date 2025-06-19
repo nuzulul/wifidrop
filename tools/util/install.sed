@@ -26,7 +26,7 @@ DisplayLicense=
 FinishMessage=
 TargetName=wifidrop.exe
 FriendlyName=WIFIDrop
-AppLaunched=cmd /c "@echo off & mode con cols=60 lines=20 & title WIFIDrop & install.bat"
+AppLaunched=cmd /V:ON /c "@echo off & mode con cols=60 lines=20 & title WIFIDrop & install.bat /n"
 PostInstallCmd=<None>
 AdminQuietInstCmd=cmd /V:ON /c "@echo off & mode con cols=60 lines=20 & title WIFIDrop & install.bat /q"
 UserQuietInstCmd=cmd /V:ON /c "@echo off & mode con cols=60 lines=20 & title WIFIDrop & install.bat /q"

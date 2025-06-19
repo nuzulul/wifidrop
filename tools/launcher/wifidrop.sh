@@ -31,6 +31,9 @@ if command -v node &> /dev/null
 then
   node -v
   npm -v
+  npm -y exec --package=wifidrop@latest -- wifidrop "$@"
+else
+  echo "Node.js is not installed."
+  echo "Please install Node.js."
 fi
 
-npm -y exec --package=wifidrop@latest -- wifidrop "$@"
