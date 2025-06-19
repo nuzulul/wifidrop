@@ -56,7 +56,7 @@ if "%1"=="--uninstall" (
 	goto exit
 )
 
-set /p version=< wifidrop.txt
+set /p version=< wifidrop-version.txt
 if "%1"=="--version" (
 	echo Version : WIFIDrop BATCH Launcher %version%
 	echo https://wifidrop.js.org
