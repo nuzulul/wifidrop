@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools >= 62"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wifidrop"
+version = "0.0.9"
+description = "Local peer-to-peer file transfer via WIFI"
+requires-python = ">= 3"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Nuzulul Zulkarnain" }
+]
+keywords = ["file transfer", "file sharing", "p2p"]
+
+[project.urls]
+Homepage = "https://wifidrop.js.org"
+Repository = "https://github.com/nuzulul/wifidrop"
+Issues = "https://github.com/nuzulul/wifidrop/issues"
+
+[project.scripts]
+wifidrop = "pippkg:wifidrop"
+
+[tool.setuptools.packages.find]
+where = ["tools"]
+include = ["pippkg"]

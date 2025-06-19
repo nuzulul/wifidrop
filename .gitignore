@@ -147,4 +147,10 @@ parts
 prime
 stage
 *.snap
+
 *.exe
+
+#python
+*.pyc
+*.egg-info
+__pycache__

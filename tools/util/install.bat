@@ -22,6 +22,7 @@ if "%1"=="/main" (
 	echo WIFIDrop
 	echo https://wifidrop.js.org
 	echo Checking WIFIDrop prerequisites ...
+	cd %~dp0
 	if "%1"=="/q" (
 		powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --silent\",0)"
 	) else (
