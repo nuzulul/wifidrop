@@ -84,12 +84,12 @@ CD /D %tempdir%
 
 if "%2"=="--silent" (
 	cmd /c "wifidrop.bat --install --quiet"
-	goto install
+	goto installpath
 )
 
 if "%2"=="--normal" (
 	cmd /c "wifidrop.bat --install --launch"
-	goto install
+	goto exit
 )
 
 if "%2"=="--uninstall" (
@@ -100,7 +100,7 @@ if "%2"=="--uninstall" (
 cmd /c "wifidrop.bat --install --launch %*"
 goto exit
 
-:install
+:installpath
 
 set installdir=%localappdata%\narojilstudio\wifidrop\launcher
 set app=%installdir%\wifidrop.bat
