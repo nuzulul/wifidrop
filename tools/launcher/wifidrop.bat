@@ -1,9 +1,18 @@
 @echo off
-setlocal
+setlocal ENABLEDELAYEDEXPANSION
 
 title WIFIDrop
 
 cd %~dp0
+
+if "%1"=="--debug" (
+	if exist wifidrop.txt (
+		set /p version=< wifidrop.txt
+	) else (
+		set version=
+	)
+	echo Version : WIFIDrop BATCH Installer !version!
+)
 
 where powershell.exe >nul 2>&1
 
@@ -11,6 +20,7 @@ if %errorlevel% equ 0 (
     rem echo PowerShell exists on this system.
 ) else (
     echo PowerShell does not exist on this system or is not in the system's PATH.
+	echo Open : https://wifidrop.js.org
 	pause
 	goto exit
 )
@@ -27,7 +37,7 @@ if "%1"=="--install" (
 	copy "%~f0" "%installdir%\wifidrop.bat" /Y >nul
 	copy "%~dp0\wifidrop.ico" "%installdir%\wifidrop.ico" /Y >nul
 	copy "%~dp0\README.md" "%installdir%\README.md" /Y >nul
-	copy "%~dp0\wifidrop.txt" "%installdir%\wifidrop-version.txt" /Y >nul
+	copy "%~dp0\wifidrop.txt" "%installdir%\wifidrop.txt" /Y >nul
 	powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('WIFIDrop.lnk');$s.TargetPath='powershell.exe';$s.Arguments='\""$s=(New-Object -COM WScript.Shell).Run(\\\"wifidrop.bat\\\",0)\""';$s.IconLocation='%installdir%\wifidrop.ico';$s.WorkingDirectory='%installdir%';$s.WindowStyle=7;$s.Save()"
 	if not exist "%startmenudir%" md "%startmenudir%"
 	copy "%~dp0\WIFIDrop.lnk" "%installdir%\WIFIDrop.lnk" /Y >nul
@@ -56,9 +66,10 @@ if "%1"=="--uninstall" (
 	goto exit
 )
 
-set /p version=< wifidrop-version.txt
+
 if "%1"=="--version" (
-	echo Version : WIFIDrop BATCH Launcher %version%
+	set /p version=< wifidrop.txt
+	echo Version : WIFIDrop BATCH Launcher !version!
 	echo https://wifidrop.js.org
 	goto exit
 )

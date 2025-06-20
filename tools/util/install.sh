@@ -2,10 +2,16 @@
 
 OS=$(uname)
 
+if [[ "$1" == "--debug" ]]; then
+	version=$(<wifidrop.txt)
+	echo "Version : WIFIDrop BASH Installer $version"
+fi
+
 if [[ "$OS" == "Linux" ]]; then
 	echo "Platform Linux"
 else
 	echo "Platform not supported yet"
+	echo "Open : https://wifidrop.js.org"
 	exit 1
 fi
 
@@ -14,7 +20,7 @@ if command -v git &> /dev/null; then
     git --version
 else
     echo "Git is not installed."
-    echo "Please install Git to install WIFIDrop."
+    echo "Open : https://wifidrop.js.org"
 	exit 1
 fi
 
@@ -41,7 +47,9 @@ else
   mkdir "$CACHE_DIR"
 fi
 
-if [[ "$1" == "/q" ]]; then
+if [[ "$1" == "/n" ]]; then
+	echo "Skip PATH Install"
+else
 	# symbolic link
 	mkdir -p "$HOME/.local/bin"
 	ln -s "$CACHE_DIR/wifidrop/tools/launcher/wifidrop.sh" "$HOME/.local/bin/wifidrop"
@@ -59,5 +67,7 @@ cp -f "$CACHE_DIR/wifidrop/tools/launcher/wifidrop.desktop" "$HOME/.local/share/
 chmod -R 777 "$CACHE_DIR/wifidrop"
 
 # message
-echo "WIFIDrop has been installed successfully!"
+echo "Loading WIFIDrop ..."
+
+"$CACHE_DIR/wifidrop/tools/launcher/wifidrop.sh" $1
 

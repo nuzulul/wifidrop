@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if [[ "$1" == "--debug" ]]; then
+	version=$(<wifidrop.txt)
+	echo "Version : WIFIDrop BASH Launcher $version"
+fi
+
 if [[ "$1" == "--version" ]]; then
 	version=$(<wifidrop.txt)
 	echo "Version : WIFIDrop BASH Launcher $version"

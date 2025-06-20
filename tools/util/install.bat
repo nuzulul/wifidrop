@@ -5,12 +5,22 @@ title WIFIDrop
 
 cd %~dp0
 
+if "%1"=="--debug" (
+	if exist wifidrop.txt (
+		set /p version=< wifidrop.txt
+	) else (
+		set version=
+	)
+	echo Version : WIFIDrop BATCH Installer !version!
+)
+
 where powershell.exe >nul 2>&1
 
 if %errorlevel% equ 0 (
     rem echo PowerShell exists on this system.
 ) else (
     echo PowerShell does not exist on this system or is not in the system's PATH.
+	echo Open : https://wifidrop.js.org
 	pause
 	goto exit
 )
@@ -39,6 +49,7 @@ if "%1"=="/main" (
 				) else (
 					if "%1"=="--debug" (
 						cmd /c "install.bat /main --debug"
+						goto exit
 					) else (
 						powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main %*\",0)"
 					)
@@ -109,8 +120,8 @@ if "%2"=="--uninstall" (
 	goto exit
 )
 	
-cmd /c "wifidrop.bat --install --launch %*"
-goto exit
+cmd /c "wifidrop.bat --install --launch %2"
+goto installpath
 
 :installpath
 
