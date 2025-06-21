@@ -19,10 +19,16 @@ where powershell.exe >nul 2>&1
 if %errorlevel% equ 0 (
     rem echo PowerShell exists on this system.
 ) else (
-    echo PowerShell does not exist on this system or is not in the system's PATH.
-	echo Open : https://wifidrop.js.org
-	pause
-	goto exit
+	if "%1"=="/q" (
+		echo PowerShell does not exist on this system or is not in the system's PATH.
+		echo Open : https://wifidrop.js.org
+		goto exit	
+	) else (
+		echo PowerShell does not exist on this system or is not in the system's PATH.
+		echo Open : https://wifidrop.js.org
+		pause
+		goto exit
+	)
 )
 
 set/a timer=0
