@@ -1,8 +1,8 @@
 #!/bin/sh
 
 if [ "$1" = "--debug" ]; then
-	if [ -f "$SNAP/version.txt" ]; then
-		version=$(cat $SNAP/version.txt)
+	if [ -f "$SNAP/bin/version.txt" ]; then
+		version=$(cat $SNAP/bin/version.txt)
 	fi
 	echo "Version : WIFIDrop SNAP $version"
 fi

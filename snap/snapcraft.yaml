@@ -48,7 +48,7 @@ parts:
       craftctl default
     override-build: |
       craftctl default
-      echo $(git log --format="%H" -n1)>version.text
+      echo $(git log --format="%H" -n1)>${CRAFT_PART_INSTALL}/bin/version.txt
     stage-packages:
       - ca-certificates
       - fonts-liberation
@@ -97,4 +97,4 @@ parts:
       # Fix resource permissions
       chmod +rx $CRAFT_STAGE/bin/launcher
       
-      snapcraftctl prime     
+      craftctl default     
