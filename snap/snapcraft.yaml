@@ -19,7 +19,7 @@ grade: stable
 
 apps:
   wifidrop:
-    command: bin/wifidrop
+    command: bin/launcher
     extensions: [gnome]
     plugs:
     - home
@@ -35,14 +35,20 @@ apps:
     - opengl
     - network-bind    
     environment:
-      TMPDIR: $XDG_RUNTIME_DIR     
+      TMPDIR: $XDG_RUNTIME_DIR   
 
 parts:
   wifidrop:
     plugin: npm
     npm-include-node: true
     npm-node-version: 22.16.0
-    source: .
+    source: https://github.com/nuzulul/wifidrop
+    source-type: git
+    override-pull: |
+      craftctl default
+    override-build: |
+      craftctl default
+      echo $(git log --format="%H" -n1)>version.text
     stage-packages:
       - ca-certificates
       - fonts-liberation
@@ -81,4 +87,14 @@ parts:
       - lsb-release
       - wget
       - xdg-utils  
-      - gxmessage      
+      - gxmessage  
+  launcher:
+    plugin: dump
+    source: snap/local
+    source-type: local  
+    override-prime: |
+      
+      # Fix resource permissions
+      chmod +rx $CRAFT_STAGE/bin/launcher
+      
+      snapcraftctl prime     
