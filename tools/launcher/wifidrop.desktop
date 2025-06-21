@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=WIFIDrop
+Icon=/usr/share/wifidrop/tools/launcher/wifidrop.png
+Comment=Local peer-to-peer file transfer via WIFI.
+Exec=wifidrop -desktop
+Terminal=false
+Categories=Utility;

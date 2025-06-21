@@ -1,0 +1,100 @@
+name: wifidrop
+title: WIFIDrop
+version: git
+summary: Local peer-to-peer file transfer via WIFI.
+description: |
+  Run with:-
+    $ wifidrop
+
+website: https://wifidrop.js.org
+contact: https://github.com/nuzulul/wifidrop/issues
+issues: https://github.com/nuzulul/wifidrop/issues
+source-code: https://github.com/nuzulul/wifidrop
+license: GPL-3.0
+icon: snap/wifidrop.png
+
+confinement: strict
+base: core22
+grade: stable
+
+apps:
+  wifidrop:
+    command: bin/launcher
+    extensions: [gnome]
+    plugs:
+    - home
+    - desktop
+    - desktop-legacy
+    - x11
+    - unity7
+    - wayland
+    - browser-support
+    - network
+    - gsettings
+    - pulseaudio
+    - opengl
+    - network-bind    
+    environment:
+      TMPDIR: $XDG_RUNTIME_DIR   
+
+parts:
+  wifidrop:
+    plugin: npm
+    npm-include-node: true
+    npm-node-version: 22.16.0
+    source: https://github.com/nuzulul/wifidrop
+    source-type: git
+    override-pull: |
+      craftctl default
+    override-build: |
+      craftctl default
+      echo $(git log --format="%H" -n1)>${CRAFT_PART_INSTALL}/bin/version.txt
+    stage-packages:
+      - ca-certificates
+      - fonts-liberation
+      - libappindicator3-1
+      - libasound2
+      - libatk-bridge2.0-0
+      - libatk1.0-0
+      - libc6
+      - libcairo2
+      - libcups2
+      - libdbus-1-3
+      - libexpat1
+      - libfontconfig1
+      - libgbm1
+      - libgcc1
+      - libglib2.0-0
+      - libgtk-3-0
+      - libnspr4
+      - libnss3
+      - libpango-1.0-0
+      - libpangocairo-1.0-0
+      - libstdc++6
+      - libx11-6
+      - libx11-xcb1
+      - libxcb1
+      - libxcomposite1
+      - libxcursor1
+      - libxdamage1
+      - libxext6
+      - libxfixes3
+      - libxi6
+      - libxrandr2
+      - libxrender1
+      - libxss1
+      - libxtst6
+      - lsb-release
+      - wget
+      - xdg-utils  
+      - gxmessage  
+  launcher:
+    plugin: dump
+    source: snap/local
+    source-type: local  
+    override-prime: |
+      
+      # Fix resource permissions
+      chmod +rx $CRAFT_STAGE/bin/launcher
+      
+      snapcraftctl prime     

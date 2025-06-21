@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=WIFIDrop
+Icon=${SNAP}/meta/gui/wifidrop.png
+Exec=wifidrop -desktop
+Terminal=false
+Categories=Utility;

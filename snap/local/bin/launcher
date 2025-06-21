@@ -1,0 +1,17 @@
+#!/bin/sh
+
+if [ "$1" = "--debug" ]; then
+	if [ -f "$SNAP/bin/version.txt" ]; then
+		version=$(cat $SNAP/bin/version.txt)
+	fi
+	echo "Version : WIFIDrop SNAP $version"
+fi
+
+if [ "$1" = "--uninstall" ]; then
+	echo "You should try this : sudo snap remove wifidrop"
+	exit 1
+fi
+
+npm config set update-notifier false
+
+npm -y exec --package=wifidrop@latest -- wifidrop $@
