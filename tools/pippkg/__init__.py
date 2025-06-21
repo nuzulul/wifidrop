@@ -18,7 +18,29 @@ def wifidrop():
     if sys.platform.startswith('linux'):
         url = 'https://github.com/nuzulul/wifidrop/raw/refs/heads/main/tools/util/install.sh'
         filename = 'install.sh'
-        print(f"Unsupported platform: {sys.platform}")
+        temp_dir_path = tempfile.gettempdir()
+        folder_path = os.path.join(temp_dir_path, "wifidrop")
+        if not os.path.exists(folder_path):
+            # Create the folder if it doesn't exist
+            os.makedirs(folder_path)
+            
+        if os.path.exists(folder_path):
+            temp_file_path = os.path.join(folder_path, filename)
+            path, headers = urlretrieve(url, temp_file_path)
+            if len(sys.argv) > 1:
+                if sys.argv[1] == "--debug":
+                    os.system(f"env bash {temp_file_path} {sys.argv[1]}")
+                elif sys.argv[1] == "--uninstall":
+                    os.system(f"env bash {temp_file_path} {sys.argv[1]}")
+                elif sys.argv[1] == "/s":
+                    os.system(f"env bash {temp_file_path} {sys.argv[1]}")
+                elif sys.argv[1] == "--force-install-dependencies":
+                    os.system(f"env bash {temp_file_path} {sys.argv[1]}")                    
+                else:
+                    print("Switch not supported")
+            else:
+                os.system(f"env bash {temp_file_path} /n")
+                
     elif sys.platform.startswith('win'):
         url = 'https://github.com/nuzulul/wifidrop/raw/refs/heads/main/tools/util/install.bat'
         filename = 'install.bat'
