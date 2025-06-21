@@ -29,7 +29,8 @@ let listrequiredpackage = ['ca-certificates','fonts-liberation','libappindicator
 if(args.length > 0 && args[0] === '--debug'){
 	console.log('Mode : debug')
 	try{
-		console.log('Version : WIFIDrop NPM CLI',process.env.npm_package_version)
+		const ver = process.env.npm_package_version || "wifidrop@latest";
+		console.log('Version : WIFIDrop NPM CLI',ver)
 	}catch(e){
 		console.log(e)
 	}

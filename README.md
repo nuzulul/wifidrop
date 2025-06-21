@@ -47,9 +47,13 @@ Android : [https://play.google.com/store/apps/details?id=org.js.wifidrop](https:
 
 Windows : [https://apps.microsoft.com/detail/9MVN98K4BBWC](https://apps.microsoft.com/detail/9MVN98K4BBWC)
 
-Linux : [https://snapcraft.io/wifidrop](https://snapcraft.io/wifidrop)
+Linux : [https://snapcraft.io/wifidrop](https://snapcraft.io/wifidrop) - `snap install wifidrop`
 
 NPM : [https://www.npmjs.com/package/wifidrop](https://www.npmjs.com/package/wifidrop) - `npm install -g wifidrop`
+
+cURL : `curl -o- https://raw.githubusercontent.com/nuzulul/wifidrop/refs/tags/0.1.0/tools/util/install.sh | bash`
+
+Wget : `wget -qO- https://raw.githubusercontent.com/nuzulul/wifidrop/refs/tags/0.1.0/tools/util/install.sh | bash`
 
 Self-hosted : [https://github.com/nuzulul/wifidrop](https://github.com/nuzulul/wifidrop)
 
