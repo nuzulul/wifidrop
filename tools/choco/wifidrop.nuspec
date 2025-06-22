@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. -->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>wifidrop</id>
+    <version>0.1.0</version>
+    <packageSourceUrl>https://github.com/nuzulul/wifidrop/tree/main/tools/util</packageSourceUrl>
+    <owners>nuzulul</owners>
+    <title>WIFIDrop</title>
+    <authors>Nuzulul Zulkarnain</authors>
+    <projectUrl>https://wifidrop.js.org</projectUrl>
+    <iconUrl>https://github.com/nuzulul/wifidrop/raw/refs/heads/main/tools/launcher/wifidrop.png</iconUrl>
+    <copyright>Copyright (c) Nuzulul Zulkarnain</copyright>
+    <licenseUrl>https://github.com/nuzulul/wifidrop/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/nuzulul/wifidrop</projectSourceUrl>
+    <docsUrl>https://github.com/nuzulul/wifidrop</docsUrl>
+    <mailingListUrl>https://github.com/nuzulul/wifidrop/discussions</mailingListUrl>
+    <bugTrackerUrl>https://github.com/nuzulul/wifidrop/issues</bugTrackerUrl>
+    <tags>wifidrop file-transfer file-sharing p2p</tags>
+    <summary>Local peer-to-peer file transfer via WIFI</summary>
+    <description><![CDATA[WIFIDrop is a local peer-to-peer file transfer application via WIFI.
+
+This application can make it easier for users to send files to other devices on the same WIFI network.
+
+There is no limit to how many and how big the files will be sent.
+
+Just open the WIFIDrop application on all your devices and they will be connected automatically.
+
+No need to log in or create an account.
+
+Steps:
+
+1. Connect 2 devices to the same WIFI network.
+
+2. Open the application on each device.
+
+3. Wait a few moments for the applications to detect each other.
+
+4. The application is ready to be used to send files.
+
+Online : [https://wifidrop.js.org](https://wifidrop.js.org)
+
+![WIFIDrop](https://github.com/nuzulul/wifidrop/raw/main/screenshot.png)]]></description>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

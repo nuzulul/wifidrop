@@ -154,3 +154,5 @@ stage
 *.pyc
 *.egg-info
 __pycache__
+
+*.nupkg
