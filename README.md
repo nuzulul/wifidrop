@@ -39,25 +39,37 @@ npm run build
 
 A new build of WIFIDrop PWA will now be available in the `/dist` directory that you can self-hosted on static hosting.
 
-## Install
+## Installation
+
+### Cross-Paltform
 
 Online : [https://wifidrop.js.org](https://wifidrop.js.org)
 
-Android : [https://play.google.com/store/apps/details?id=org.js.wifidrop](https://play.google.com/store/apps/details?id=org.js.wifidrop)
-
-Windows : [https://apps.microsoft.com/detail/9MVN98K4BBWC](https://apps.microsoft.com/detail/9MVN98K4BBWC)
-
-Linux : [https://snapcraft.io/wifidrop](https://snapcraft.io/wifidrop) - `snap install wifidrop`
-
 NPM : [https://www.npmjs.com/package/wifidrop](https://www.npmjs.com/package/wifidrop) - `npm install -g wifidrop`
 
-cURL : `curl -o- https://raw.githubusercontent.com/nuzulul/wifidrop/refs/tags/0.1.0/tools/util/install.sh | bash`
+### Android
 
-Wget : `wget -qO- https://raw.githubusercontent.com/nuzulul/wifidrop/refs/tags/0.1.0/tools/util/install.sh | bash`
+Google Play : [https://play.google.com/store/apps/details?id=org.js.wifidrop](https://play.google.com/store/apps/details?id=org.js.wifidrop)
+
+### Windows
+
+Microsoft Store : [https://apps.microsoft.com/detail/9MVN98K4BBWC](https://apps.microsoft.com/detail/9MVN98K4BBWC)
+
+EXE / ZIP : [https://github.com/nuzulul/wifidrop/releases](https://github.com/nuzulul/wifidrop/releases)
+
+### Linux
+
+Snap Store : [https://snapcraft.io/wifidrop](https://snapcraft.io/wifidrop) - `snap install wifidrop`
+
+cURL : `curl -o- https://raw.githubusercontent.com/nuzulul/wifidrop/main/tools/util/install.sh | bash`
+
+Wget : `wget -qO- https://raw.githubusercontent.com/nuzulul/wifidrop/main/tools/util/install.sh | bash`
+
+DEB : [https://github.com/nuzulul/wifidrop/releases](https://github.com/nuzulul/wifidrop/releases)
+
+### Other
 
 Self-hosted : [https://github.com/nuzulul/wifidrop](https://github.com/nuzulul/wifidrop)
-
-Releases : [https://github.com/nuzulul/wifidrop/releases](https://github.com/nuzulul/wifidrop/releases)
 
 ## License
 
