@@ -60,6 +60,7 @@ if "%1"=="--install" (
 )
 
 if "%1"=="--uninstall" (
+	start cmd /V:ON /c "@echo off & mode con cols=60 lines=20 & set load=#& title WIFIDrop & echo UNINSTALL WIFIDROP PLEASE WAIT ... & FOR /L %%A IN (1,1,3) DO ( set load=!load!#& CLS & echo UNINSTALL WIFIDROP PLEASE WAIT ... %%A & echo:!load! & Timeout /t 1 >nul)"
 	echo Uninstall WIFIDrop ...
 	rmdir /s /q "%startmenudir%"
 	del /F /S /Q "%userprofile%\desktop\WIFIDrop.lnk"
