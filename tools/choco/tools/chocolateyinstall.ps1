@@ -1,21 +1,21 @@
 ﻿$ErrorActionPreference = 'Stop'
 $toolsDir   = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
-$url        = 'https://github.com/nuzulul/wifidrop/releases/download/0.1.0/wifidrop-0.1.0-windows.exe'
+$url        = 'https://github.com/nuzulul/wifidrop/releases/download/0.1.0/wifidrop-0.1.0-windows.zip'
 
 $packageArgs = @{
   packageName   = $env:ChocolateyPackageName
   unzipLocation = $toolsDir
-  fileType      = 'EXE'
   url           = $url
-  softwareName  = 'WIFIDrop*'
-  checksum      = 'fd52b473aa6609cd7755a463018ade33b32f2c723bbddee00d93961634e6f45c'
+  checksum      = 'a4bbe2f0744e1f248dd5963040c3401cb48f8d92ed30ed69c799197594abd1dd'
   checksumType  = 'sha256'
-  silentArgs   = '/q'
-  validExitCodes= @(0)
 }
 
-Install-ChocolateyPackage @packageArgs
+Install-ChocolateyZipPackage @packageArgs
 
+
+$binaryFileName = 'wifidrop-0.1.0-windows.exe'
+$targetPath = Join-Path -Path $toolsDir -ChildPath $binaryFileName
+Start-Process -FilePath $targetPath -ArgumentList '/q' -ErrorAction Continue
 
 
 
