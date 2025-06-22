@@ -4,7 +4,7 @@
   <metadata>
     <id>wifidrop</id>
     <version>0.1.0</version>
-    <packageSourceUrl>https://github.com/nuzulul/wifidrop/tree/main/tools/util</packageSourceUrl>
+    <packageSourceUrl>https://github.com/nuzulul/wifidrop/tree/main/tools/choco</packageSourceUrl>
     <owners>nuzulul</owners>
     <title>WIFIDrop</title>
     <authors>Nuzulul Zulkarnain</authors>
