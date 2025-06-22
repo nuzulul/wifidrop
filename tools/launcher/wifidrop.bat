@@ -1,17 +1,19 @@
 @echo off
-setlocal ENABLEDELAYEDEXPANSION
+setlocal
 
 title WIFIDrop
 
 cd %~dp0
 
 if "%1"=="--debug" (
+	setlocal ENABLEDELAYEDEXPANSION
 	if exist wifidrop.txt (
 		set /p version=< wifidrop.txt
 	) else (
 		set version=
 	)
 	echo Version : WIFIDrop BATCH Installer !version!
+	setlocal DISABLEDELAYEDEXPANSION
 )
 
 where powershell.exe >nul 2>&1
