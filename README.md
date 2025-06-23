@@ -1,6 +1,6 @@
 # WIFIDrop
 
-Local peer-to-peer file transfer via WIFI.
+Local peer-to-peer file transfer via WIFI with auto discovery alternative to AirDrop and LocalSend.
 
 WIFIDrop is an easy-to-use progressive web app (PWA) that allows users to transfer large files between devices over the same WIFI network. Files are transferred securely peer-to-peer via WebRTC without any intermediary servers. Therefore this application is a completely client side application and can be deploy on any static hosting or localhost.
 
@@ -54,6 +54,8 @@ Google Play : [https://play.google.com/store/apps/details?id=org.js.wifidrop](ht
 ### Windows
 
 Microsoft Store : [https://apps.microsoft.com/detail/9MVN98K4BBWC](https://apps.microsoft.com/detail/9MVN98K4BBWC)
+
+PowerShell : `irm https://raw.githubusercontent.com/nuzulul/wifidrop/main/tools/util/install.ps1 | iex`
 
 EXE / ZIP : [https://github.com/nuzulul/wifidrop/releases](https://github.com/nuzulul/wifidrop/releases)
 
