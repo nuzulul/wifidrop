@@ -1,0 +1,25 @@
+{
+"version":  "0.1.0",
+"description": "Local peer-to-peer file transfer via WIFI",
+"license":  "GPL-3.0-only",
+"url":  "https://github.com/nuzulul/wifidrop/releases/download/0.1.0/wifidrop-0.1.0-windows.exe",
+"homepage":  "https://wifidrop.js.org",
+"hash":  "sha256:fd52b473aa6609cd7755a463018ade33b32f2c723bbddee00d93961634e6f45c",
+"extract_dir": "wifidrop",
+"checkver": {
+	"github": "https://github.com/nuzulul/wifidrop"
+},
+"installer": {
+	"script": [
+		"$targetPath = Join-Path -Path $dir -ChildPath $fname;Start-Process -FilePath $targetPath -ArgumentList '/q' -ErrorAction Continue;"
+	]
+},
+"uninstaller": {
+	"script": [
+		"Start-Process -FilePath 'cmd.exe' -ArgumentList '/c wifidrop --uninstall' -ErrorAction Continue;"
+	]
+},	
+"autoupdate": {
+	"url": "https://github.com/nuzulul/wifidrop/releases/download/$version/wifidrop-$version-windows.exe"
+}	
+}
