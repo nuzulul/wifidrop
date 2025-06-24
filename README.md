@@ -55,9 +55,9 @@ Google Play : [https://play.google.com/store/apps/details?id=org.js.wifidrop](ht
 
 Microsoft Store : [https://apps.microsoft.com/detail/9MVN98K4BBWC](https://apps.microsoft.com/detail/9MVN98K4BBWC)
 
-PowerShell : `irm https://raw.githubusercontent.com/nuzulul/wifidrop/main/tools/util/install.ps1 | iex`
+CMD / Command Prompt : `powershell -Command "irm https://wifidrop.js.org/install.ps1 | iex"`
 
-CMD / Command Prompt : `powershell -Command "irm https://raw.githubusercontent.com/nuzulul/wifidrop/main/tools/util/install.ps1 | iex"`
+PowerShell : `irm https://wifidrop.js.org/install.ps1 | iex`
 
 EXE / ZIP : [https://github.com/nuzulul/wifidrop/releases](https://github.com/nuzulul/wifidrop/releases)
 
@@ -65,9 +65,9 @@ EXE / ZIP : [https://github.com/nuzulul/wifidrop/releases](https://github.com/nu
 
 Snap Store : [https://snapcraft.io/wifidrop](https://snapcraft.io/wifidrop) - `snap install wifidrop`
 
-cURL : `curl -o- https://raw.githubusercontent.com/nuzulul/wifidrop/main/tools/util/install.sh | bash`
+cURL : `curl -o- https://wifidrop.js.org/install.sh | bash`
 
-Wget : `wget -qO- https://raw.githubusercontent.com/nuzulul/wifidrop/main/tools/util/install.sh | bash`
+Wget : `wget -qO- https://wifidrop.js.org/install.sh | bash`
 
 DEB : [https://github.com/nuzulul/wifidrop/releases](https://github.com/nuzulul/wifidrop/releases)
 
