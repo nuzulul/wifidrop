@@ -64,7 +64,7 @@ if "%1"=="/main" (
 		)
 	)
 	
-	FOR /L %%A IN (1,1,1000) DO ( 
+	FOR /L %%A IN (1,1,30) DO ( 
 		set load=!load!#
 		CLS
 		echo WIFIDrop

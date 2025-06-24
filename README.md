@@ -57,6 +57,8 @@ Microsoft Store : [https://apps.microsoft.com/detail/9MVN98K4BBWC](https://apps.
 
 PowerShell : `irm https://raw.githubusercontent.com/nuzulul/wifidrop/main/tools/util/install.ps1 | iex`
 
+CMD / Command Prompt : `powershell -Command "irm https://raw.githubusercontent.com/nuzulul/wifidrop/main/tools/util/install.ps1 | iex"`
+
 EXE / ZIP : [https://github.com/nuzulul/wifidrop/releases](https://github.com/nuzulul/wifidrop/releases)
 
 ### Linux
