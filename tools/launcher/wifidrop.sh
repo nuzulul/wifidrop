@@ -22,16 +22,16 @@ install_nvm() {
 
 if command -v node &> /dev/null
 then
-	echo "Node.js is installed."
+	# echo "Node.js is installed."
 else
-	echo "Node.js is not installed."
+	# echo "Node.js is not installed."
 	NODE_VERSION="22.16.0"
 	# Check if NVM is installed
 	if ! command -v nvm &> /dev/null
 	then
 		install_nvm
 	else
-		echo "NVM is already installed."
+		# echo "NVM is already installed."
 	fi
 	# Install Node.js using NVM
 	nvm install $NODE_VERSION
@@ -41,8 +41,9 @@ fi
 # Verify installation
 if command -v node &> /dev/null
 then
-  node -v
-  npm -v
+  # node -v
+  # npm -v
+  npm config set update-notifier false
   npm -y exec --package=wifidrop@latest -- wifidrop $@
 else
   echo "Node.js is not installed."

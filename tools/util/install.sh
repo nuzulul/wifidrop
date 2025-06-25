@@ -16,7 +16,7 @@ else
 fi
 
 if command -v git &> /dev/null; then
-    echo "Git is installed."
+    # echo "Git is installed."
     git --version
 else
     echo "Git is not installed."

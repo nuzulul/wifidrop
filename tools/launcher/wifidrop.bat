@@ -1,7 +1,6 @@
 @echo off
 setlocal
 
-color 3f
 title WIFIDrop
 
 cd %~dp0
@@ -13,7 +12,7 @@ if "%1"=="--debug" (
 	) else (
 		set version=
 	)
-	echo Version : WIFIDrop BATCH Installer !version!
+	echo Version : WIFIDrop BATCH Launcher !version!
 	setlocal DISABLEDELAYEDEXPANSION
 )
 
@@ -61,7 +60,7 @@ if "%1"=="--install" (
 )
 
 if "%1"=="--uninstall" (
-	start cmd /V:ON /c "@echo off & mode con cols=60 lines=20 & set load=#& title WIFIDrop & echo UNINSTALL WIFIDROP PLEASE WAIT ... & FOR /L %%A IN (1,1,3) DO ( set load=!load!#& CLS & echo UNINSTALL WIFIDROP PLEASE WAIT ... %%A & echo:!load! & Timeout /t 1 >nul)"
+	start cmd /V:ON /c "@echo off & mode con cols=60 lines=20 & set load=#& color 3f & title WIFIDrop & echo UNINSTALL WIFIDROP PLEASE WAIT ... & FOR /L %%A IN (1,1,3) DO ( set load=!load!#& CLS & echo UNINSTALL WIFIDROP PLEASE WAIT ... %%A & echo:!load! & Timeout /t 1 >nul)"
 	echo Uninstall WIFIDrop ...
 	rmdir /s /q "%startmenudir%"
 	del /F /S /Q "%userprofile%\desktop\WIFIDrop.lnk"
@@ -107,7 +106,7 @@ rem check is node available
 set nodev=
 for /f "delims=" %%i in ('node -v 2^>nul') do set nodev=%%i
 if "%nodev%"=="" (
-	echo Node.js is not installed or not in PATH.
+	rem echo Node.js is not installed or not in PATH.
     goto checkexe
 )
 
@@ -115,13 +114,13 @@ rem check is npm available
 set npmv=
 for /f "delims=" %%i in ('npm -v 2^>nul') do set npmv=%%i
 if "%npmv%"=="" (
-    echo NPM is not installed or not in PATH.
+    rem echo NPM is not installed or not in PATH.
     goto checkexe
 )
 
 rem if node and nvm available jump to main 
-echo Node.js is installed. Version: %nodev%
-echo NPM is installed. Version: %npmv%
+rem echo Node.js is installed. Version: %nodev%
+rem echo NPM is installed. Version: %npmv%
 goto main
 
 :checkexe
@@ -131,17 +130,17 @@ for %%i in ("%nodeexe%") do (
     if exist "%%i" set nodePath="%%i"
 )
 if "%nodePath%"=="" (
-    echo Node.js is not in default locations.
+    rem echo Node.js is not in default locations.
 	goto downloadnode
 	goto main
 ) else (
-    echo Node.js is installed at %nodePath%
+    rem echo Node.js is installed at %nodePath%
 	goto updatepath
 )
 
 :downloadnode
 
-start cmd /V:ON /c "@echo off & mode con cols=60 lines=20 & set load=#& title WIFIDrop & echo CONFIGURING WIFIDROP PLEASE WAIT ... & Timeout /t 5 >nul & FOR /L %%A IN (1,1,300) DO ( set load=!load!#& CLS & echo CONFIGURING WIFIDROP PLEASE WAIT ... %%A & echo:!load! & (tasklist | find "powershell.exe" > NUL) & If errorlevel 1 exit & Timeout /t 1 >nul)"
+start cmd /V:ON /c "@echo off & mode con cols=60 lines=20 & set load=#& color 3f & title WIFIDrop & echo CONFIGURING WIFIDROP PLEASE WAIT ... & Timeout /t 5 >nul & FOR /L %%A IN (1,1,300) DO ( set load=!load!#& CLS & echo CONFIGURING WIFIDROP PLEASE WAIT ... %%A & echo:!load! & (tasklist | find "powershell.exe" > NUL) & If errorlevel 1 exit & Timeout /t 1 >nul)"
 echo Downloading node ...
 if not exist %nodedir% md %nodedir%
 set downloadurl=https://nodejs.org/dist/v22.16.0/node-v%nodeversion%-win-x64.zip
@@ -157,7 +156,7 @@ echo Path updated for current session.
 
 :main
 
-start cmd /V:ON /c "@echo off & mode con cols=60 lines=20 & set load=#& title WIFIDrop & echo LOADING WIFIDROP PLEASE WAIT ... & FOR /L %%A IN (1,1,3) DO ( set load=!load!#& CLS & echo LOADING WIFIDROP PLEASE WAIT ... %%A & echo:!load! & Timeout /t 1 >nul)"
+start cmd /V:ON /c "@echo off & mode con cols=60 lines=20 & set load=#& color 3f & title WIFIDrop & echo LOADING WIFIDROP PLEASE WAIT ... & FOR /L %%A IN (1,1,3) DO ( set load=!load!#& CLS & echo LOADING WIFIDROP PLEASE WAIT ... %%A & echo:!load! & Timeout /t 1 >nul)"
 echo Launching ...
 
 npm -y exec --package=wifidrop@latest -- wifidrop %1
