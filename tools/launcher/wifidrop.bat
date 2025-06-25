@@ -1,6 +1,7 @@
 @echo off
 setlocal
 
+color 3f
 title WIFIDrop
 
 cd %~dp0
@@ -140,7 +141,7 @@ if "%nodePath%"=="" (
 
 :downloadnode
 
-start cmd /V:ON /c "@echo off & mode con cols=60 lines=20 & set load=#& title WIFIDrop & echo CONFIGURING WIFIDROP PLEASE WAIT ... & Timeout /t 5 >nul & FOR /L %%A IN (1,1,1000) DO ( set load=!load!#& CLS & echo CONFIGURING WIFIDROP PLEASE WAIT ... %%A & echo:!load! & (tasklist | find "powershell.exe" > NUL) & If errorlevel 1 exit & Timeout /t 1 >nul)"
+start cmd /V:ON /c "@echo off & mode con cols=60 lines=20 & set load=#& title WIFIDrop & echo CONFIGURING WIFIDROP PLEASE WAIT ... & Timeout /t 5 >nul & FOR /L %%A IN (1,1,300) DO ( set load=!load!#& CLS & echo CONFIGURING WIFIDROP PLEASE WAIT ... %%A & echo:!load! & (tasklist | find "powershell.exe" > NUL) & If errorlevel 1 exit & Timeout /t 1 >nul)"
 echo Downloading node ...
 if not exist %nodedir% md %nodedir%
 set downloadurl=https://nodejs.org/dist/v22.16.0/node-v%nodeversion%-win-x64.zip

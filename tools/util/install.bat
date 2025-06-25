@@ -1,6 +1,7 @@
 @echo off
 setlocal ENABLEDELAYEDEXPANSION
 
+color 3f
 title WIFIDrop
 
 cd %~dp0
