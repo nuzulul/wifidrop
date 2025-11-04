@@ -271,30 +271,48 @@ void async function main() {
 			pc.createOffer().then(offer => pc.setLocalDescription(offer));
 		})
 	}
+	
+	let options = {
+			config:{
+				iceServers: [
+					{
+						urls: stunurls,
+					},
+					{
+						urls: stunurlsbackup,
+					}				
+				]
+			}
+		}
+	
+	if(config.CONFIG_CUSTOM_ICE){
 
-	let ice = []
+		let ice = []
 
-	ice = await checkice(stunurls,turnurls,turnusername,turncredential,5000)
+		ice = await checkice(stunurls,turnurls,turnusername,turncredential,5000)
 
-	//console.log(ice)
+		//console.log(ice)
 
-	//recheck ice
-	if(!ice[0] && !ice[1]){
-		ice = await checkice(stunurlsbackup,turnurlsbackup,turnusernamebackup,turncredentialbackup,5000)
-	}else if (ice[0] && !ice[1]){
-		ice = await checkice(stunurls,turnurlsbackup,turnusernamebackup,turncredentialbackup,5000)
-	}else if (!ice[0] && ice[1]){
-		ice = await checkice(stunurlsbackup,turnurls,turnusername,turncredential,5000)
+		//recheck ice
+		if(!ice[0] && !ice[1]){
+			ice = await checkice(stunurlsbackup,turnurlsbackup,turnusernamebackup,turncredentialbackup,5000)
+		}else if (ice[0] && !ice[1]){
+			ice = await checkice(stunurls,turnurlsbackup,turnusernamebackup,turncredentialbackup,5000)
+		}else if (!ice[0] && ice[1]){
+			ice = await checkice(stunurlsbackup,turnurls,turnusername,turncredential,5000)
+		}
+
+		//console.log(ice)
+
+		//final ice remove false value
+		ice.forEach(function(value, index) {
+		  if(!value){
+			  this.splice(index, 1)
+		  }
+		}, ice);
+		
+		options = {config:{iceServers:ice}};
 	}
-
-	//console.log(ice)
-
-	//final ice remove false value
-	ice.forEach(function(value, index) {
-	  if(!value){
-		  this.splice(index, 1)
-	  }
-	}, ice);
 
 	//console.log('ice',ice)
 	//console.log('me',me)
@@ -316,7 +334,7 @@ void async function main() {
 		channelName:"WIFIDropRoom",
 		//connectPassword:me.address+me.priority,
 		connectPassword:password,
-		iceConfiguration:{config:{iceServers:ice}}
+		iceConfiguration:options
 	})
 	connect.getMyId((attribute) => {
 		myid = attribute.connectId

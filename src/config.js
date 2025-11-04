@@ -21,3 +21,4 @@ export const CONFIG_WEBRTC_TURN_PWD = 'Vk01SmdhODlkYjJaWU9aSA=='
 
 export const CONFIG_LARGE_LIMIT = 100 * 1024 * 1024 //100MB
 export const CONFIG_FORCE_WARNING = false
+export const CONFIG_CUSTOM_ICE = false
