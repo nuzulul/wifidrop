@@ -6,7 +6,7 @@ import wifidropLogo from '/icon-512.png'
 import fileLogo from './file.svg'
 import { setupDrop } from './drop.js'
 import {KVStorage} from 'kv-storage'
-import {generateName,waitForElm,base32,base32hex,getSizeUnit,webrtcgarbagecollector,generatekey} from './utils.js'
+import {generateName,waitForElm,base32,base32hex,getSizeUnit,webrtcgarbagecollector,generatekey,cleanproduction} from './utils.js'
 import webconnect from 'webconnect'
 import * as config from  './config.js'
 
@@ -30,6 +30,9 @@ let writableStream = new Map()
 let largesupport = false
 const forcewarning = config.CONFIG_FORCE_WARNING
 const largelimit = config.CONFIG_LARGE_LIMIT
+
+//clean production from console
+cleanproduction();
 
 //detect feature
 if(typeof showOpenFilePicker === typeof Function && typeof showSaveFilePicker === typeof Function){
@@ -273,7 +276,7 @@ void async function main() {
 	}
 	
 	let options = {
-			config:{
+			
 				iceServers: [
 					{
 						urls: stunurls,
@@ -282,7 +285,7 @@ void async function main() {
 						urls: stunurlsbackup,
 					}				
 				]
-			}
+			
 		}
 	
 	if(config.CONFIG_CUSTOM_ICE){

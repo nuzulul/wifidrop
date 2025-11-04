@@ -223,3 +223,13 @@ export function generatekey(data){
 	const result = base32.encode(data).replace(/[^a-z0-9_]/gi,'')
 	return result
 }
+
+export function cleanproduction(){
+	if (window.location.href.indexOf("localhost") < 0){
+		if(!window.console) window.console = {};
+		var methods = ["log", "debug", "warn", "info"];
+		for(var i=0;i<methods.length;i++){
+			console[methods[i]] = function(){};
+		}
+	}
+}
