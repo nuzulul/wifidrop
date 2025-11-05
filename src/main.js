@@ -270,7 +270,7 @@ void async function main() {
 				console.debug(e);
 			};
 
-			pc.createDataChannel('webpeerjs');
+			pc.createDataChannel('wifidrop');
 			pc.createOffer().then(offer => pc.setLocalDescription(offer));
 		})
 	}
@@ -315,6 +315,35 @@ void async function main() {
 		}, ice);
 		
 		options = {config:{iceServers:ice}};
+	}else{
+		await new Promise((resolve)=>{
+			const iceServers = [
+				{
+					urls: stunurls
+				}
+			];	
+			const pc = new RTCPeerConnection({
+				iceServers
+			});
+
+			pc.onicecandidate = (e) => {
+				if (!e.candidate) return;
+
+				// stun works
+				if(e.candidate.type == "srflx"){
+					me.address = e.candidate.address
+					me.priority = e.candidate.priority
+					resolve()
+				}
+			};
+
+			pc.onicecandidateerror = (e) => {
+				console.debug(e);
+			};
+
+			pc.createDataChannel('wifidrop');
+			pc.createOffer().then(offer => pc.setLocalDescription(offer));			
+		})
 	}
 
 	//console.log('ice',ice)
