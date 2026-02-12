@@ -43,22 +43,22 @@ if "%1"=="/main" (
 	echo Checking WIFIDrop prerequisites ...
 	
 	if "%1"=="/q" (
-		powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --silent\",0)"
+		powershell "$s=(New-Object -COM WScript.Shell).Run(\"%~f0 /main --silent\",0)"
 	) else (
 		if "%1"=="/s" (
-			powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --super\",0)"
+			powershell "$s=(New-Object -COM WScript.Shell).Run(\"%~f0 /main --super\",0)"
 		) else (
 			if "%1"=="/n" (
-				powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --normal\",0)"
+				powershell "$s=(New-Object -COM WScript.Shell).Run(\"%~f0 /main --normal\",0)"
 			) else (
 				if "%1"=="/u" (
-					powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main --uninstall\",0)"
+					powershell "$s=(New-Object -COM WScript.Shell).Run(\"%~f0 /main --uninstall\",0)"
 				) else (
 					if "%1"=="--debug" (
-						cmd /c "install.bat /main --debug"
+						cmd /c "%~f0 /main --debug"
 						goto exit
 					) else (
-						powershell "$s=(New-Object -COM WScript.Shell).Run(\"install.bat /main %*\",0)"
+						powershell "$s=(New-Object -COM WScript.Shell).Run(\"%~f0 /main %*\",0)"
 					)
 				)
 			)	
