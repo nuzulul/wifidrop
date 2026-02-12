@@ -59,7 +59,7 @@ CMD / Command Prompt : `powershell -Command "irm https://wifidrop.js.org/install
 
 PowerShell : `irm https://wifidrop.js.org/install.ps1 | iex`
 
-EXE / ZIP : [https://github.com/nuzulul/wifidrop/releases](https://github.com/nuzulul/wifidrop/releases)
+ZIP : [https://github.com/nuzulul/wifidrop/releases](https://github.com/nuzulul/wifidrop/releases)
 
 ### Linux
 

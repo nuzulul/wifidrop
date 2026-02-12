@@ -682,6 +682,7 @@ function fDialogClipboard(connectId){
 						<textarea id="clipboard" name="clipboard" rows="10" cols="30"></textarea>
 					</div>
 					<div class="footer">
+						<button class="clear">CLEAR</button>
 						<button class="save">SAVE</button>
 						<button class="copy">COPY</button>
 					</div>
@@ -696,8 +697,12 @@ function fDialogClipboard(connectId){
 		
 		const peer = peers.get(connectId)
 		const type = peer.type ? peer.type : 'none'
-		document.querySelector('.clipboard .message .title div').innerHTML = `<span class="varian ${type}" style="border:2px solid #${fSafe(peer.varian)};"></span>${fSafe(peer.name)}'s clipboard`
+		document.querySelector('.clipboard .message .title div').innerHTML = `<span class="varian ${type}" style="border:2px solid #${fSafe(peer.varian)};"></span>${fSafe(peer.name)}'s clipboard sync`
 		document.querySelector('.clipboard .message .content #clipboard').value = clipboard.has(connectId)?clipboard.get(connectId):''
+		
+		document.querySelector('.clipboard .message .footer .clear').addEventListener("click",()=>{
+			document.querySelector('.clipboard .message .content #clipboard').value = ''
+		})
 		
 		document.querySelector('.clipboard .message .footer .save').addEventListener("click",()=>{
 			const clip = document.querySelector('.clipboard .message .content #clipboard').value
@@ -829,7 +834,7 @@ async function fOpenPeers(filesid){
 }
 
 function fInfoNoPeers(){
-	document.querySelector('.sendto-list').innerHTML = '<div class="infonopeers" style="padding:15px 15px;">Waiting for other devices connected to WIFIDrop on the same network ...</div>'
+	document.querySelector('.sendto-list').innerHTML = '<div class="infonopeers" style="padding:15px 15px;">Open WIFIDrop on another device. Only devices in the same network are shown.</div>'
 }
 
 function fAddSendToList(peer,filesid){
