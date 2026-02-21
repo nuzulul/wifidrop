@@ -23,6 +23,7 @@ install_nvm() {
 if command -v node &> /dev/null
 then
 	# echo "Node.js is installed."
+	:
 else
 	# echo "Node.js is not installed."
 	NODE_VERSION="22.16.0"
@@ -32,6 +33,7 @@ else
 		install_nvm
 	else
 		# echo "NVM is already installed."
+		:
 	fi
 	# Install Node.js using NVM
 	nvm install $NODE_VERSION
@@ -49,4 +51,3 @@ else
   echo "Node.js is not installed."
   echo "Please install Node.js."
 fi
-
