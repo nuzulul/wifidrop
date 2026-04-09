@@ -1,7 +1,9 @@
 # WIFIDrop
 Import-Module BitsTransfer;
 $requiredPath = Join-Path -Path $env:temp -ChildPath 'wifidrop';
-Remove-Item -Path $requiredPath -Recurse -Force
+if (Test-Path -Path $requiredPath) {
+  Remove-Item -Path $requiredPath -Recurse -Force
+}
 New-Item -Path $requiredPath -ItemType Directory
 $targetPath = Join-Path -Path $env:temp -ChildPath 'wifidrop\install.bat';
 Start-BitsTransfer 'https://raw.githubusercontent.com/nuzulul/wifidrop/main/tools/util/install.bat' $targetPath
